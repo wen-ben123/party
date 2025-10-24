@@ -1,0 +1,245 @@
+{
+  "welcome_game": "欢迎来到万圣节生存战！🎃👻",
+  "welcome_ap": "欢迎来到ArenaPro！🎮✨",
+  "navigator": {
+    "language": "您的浏览器语言是：{{language}}"
+  },
+  "game_welcome": "欢迎来到万圣节生存战！右键加入这个恐怖派对吧！🧙‍♂️💀",
+  "music_hint": "万圣节音乐已经开始播放...准备好！🎶👻",
+  "block_cracking": "方块即将开始随机破裂，小心脚下！⚠️💥",
+  "candy": {
+    "collected": "收集到了万圣节糖果！🍬🎃",
+    "terrain_restoring": "地形正在修复中...🔄🌱",
+    "tnt_increased": "但TNT频率大幅提升！💣⚠️",
+    "interact_hint": "按E键收集糖果🍬👆"
+  },
+  "player_joined": "{{playerName}}加入了战斗！还有{{count}}个勇敢的灵魂！",
+  "player_left": "{{playerName}}被吓跑了！还有{{count}}个勇敢的灵魂！",
+  "game_time_minutes": "本轮游戏已经进行了{{minutes}}分钟！",
+  "game_ending_blocks": "剩余方块≤50，游戏结束！",
+  "game_over_all_dead": "游戏结束！所有灵魂都变成了鬼魂！万圣节之夜胜利了！",
+  "game_over_single_player_win": "{{playerName}}在万圣节之夜生存了5分钟！你是真正的生存大师！🏆🎉",
+  "game_over_single_player_time": "单人模式结束！{{playerName}}在恐怖的万圣节之夜生存了{{minutes}}分{{seconds}}秒！",
+  "game_over_multiplayer_last": "恭喜{{playerName}}成为万圣节之王！你击败了所有恶魔和怪物！👑🔥",
+  "game_over_multiplayer_winners": "万圣节派对圆满结束！恭喜勇敢的幸存者们：{{players}}！你们战胜了恐惧！🎉🎃",
+  "damage_taken": "你被{{damageType}}，受到了{{damage}}点伤害，剩余HP：{{hp}}",
+  "player_died": "{{playerName}}{{damageType}}，变成了真正的鬼魂！",
+  "player_died_with_remaining": "{{playerName}}{{damageType}}，变成了真正的鬼魂！还有{{count}}个活着的灵魂！",
+  "skill_rescue_platform": "你触发了救援平台技能！🦸‍♂️🛟",
+  "skill_speed_shoes_end": "疾跑鞋效果结束",
+  "skill_meow_trap_hit": "你被{{playerName}}的喵陷阱技能击中，10秒内视线模糊🐱😵",
+  "skill_meow_trap_end": "喵呜效果已解除🧹✨",
+  "player_scared": "被吓跑了！",
+  "remaining_players": "个勇敢的灵魂！",
+  "gui": {
+    "skill": "技能🧙‍♂️",
+    "update_announcement": "更新公告",
+    "skill_name": "技能名称：{{skill}}",
+    "skill_status_ready": "可用（游戏中左键使用，右键查看时间）",
+    "skill_status_cooldown": "剩余{{time}}秒",
+    "support_modes": "支持单人/多人模式",
+    "game_features": "游戏中有蝙蝠出现，糖果可修复地形",
+    "candy_terrain_fix": "糖果可修复地形",
+    "creation_link": "创作链接：https://dao3.fun/edit/33ad32a019c21f3b36f5",
+    "join_game_content": "是否要加入下一轮游戏？10秒内加入的玩家会进入同一局游戏！",
+    "join_now": "立即加入游戏",
+    "already_joined": "你已经加入游戏了！",
+    "switch_skill_prompt": "你可以切换技能，当前技能：",
+    "switch_to_skill": "切换为此技能",
+    "switch_skill_success": "已切换技能为{{skill}}",
+    "join_game_title": "加入游戏",
+    "join_game_now": "立即加入游戏",
+    "cancel": "取消"
+  },
+  "menu": {
+    "game_menu": "游戏菜单",
+    "select_action": "请选择你要进行的操作",
+    "join_game": "立即加入游戏",
+    "view_history": "查看历史",
+    "cancel": "取消"
+  },
+  "history": {
+    "title": "你的游戏历史：",
+    "total_games": "总游戏数：{{count}}",
+    "total_wins": "总胜利数：{{count}}",
+    "win_rate": "胜率：{{rate}}%",
+    "best_time": "最佳生存时间：{{minutes}}分{{seconds}}秒",
+    "avg_time": "平均生存时间：{{minutes}}分{{seconds}}秒",
+    "last_play": "最后一次游玩：{{time}}",
+    "no_record": "你还没有游戏记录，现在开始你的第一场游戏吧！",
+    "error": "无法获取历史记录，请稍后再试。"
+  },
+  "player": {
+    "joined_and_game_starting": "{{playerName}}加入了游戏！本轮将在10秒后开始！",
+    "joined": "{{playerName}}加入了游戏！当前参与者：{{playerCount}}{{mode}}",
+    "already_in_game": "{{playerName}}已经在游戏中了！"
+  },
+  "countdown": {
+    "to_game_start": "万圣节派对将在{{seconds}}秒后开始！参与怪物数量：{{playerCount}}{{mode}}"
+  },
+  "game": {
+    "damage_taken": "{{playerName}}被{{damageType}}，损失{{damage}}点生命值",
+    "start_message": "万圣节战斗开始！鬼魂、蝙蝠和南瓜怪都出来了！祝大家好运！",
+    "already_joined": "你已经加入游戏了！",
+    "player_joined_starting": "{{player}}加入了游戏！本轮将在10秒后开始！",
+    "countdown": "万圣节派对将在{{countdown}}秒后开始！参与怪物数量：{{players}}{{mode}}",
+    "game_started": "万圣节战斗开始！鬼魂、蝙蝠和南瓜怪都出来了！祝大家好运！",
+    "multiplayer_started": "{{player}}已加入，多人模式开始！",
+    "player_joined": "{{player}}加入了游戏！当前玩家：{{count}}{{mode}}",
+    "game_info": "游戏时间：{{minutes}}分{{seconds}}秒 | 剩余：{{players}}个玩家 | 剩余方块：{{blocks}}",
+    "single_player_mode": "（孤魂模式）",
+    "multi_player_mode": "（群魔乱舞模式）",
+    "single_player_mode_simple": "（单人）",
+    "multi_player_mode_simple": "（多人）",
+    "confirm_single_player": "确认单人模式！",
+    "confirm_multi_player": "确认多人模式！",
+    "game_start": "{{mode}}游戏开始！",
+    "single": "单人",
+    "multi": "多人",
+    "summon_bats": "召唤{{count}}只蝙蝠！",
+    "minutes_passed": "本轮游戏已经进行了{{minutes}}分钟！",
+    "blocks_remaining_end": "剩余方块≤50，游戏结束！",
+    "game_over_all_dead": "游戏结束！所有灵魂都变成了鬼魂！万圣节之夜胜利了！",
+    "single_player_victory": "{{player}}在万圣节之夜生存了5分钟！你是真正的生存大师！",
+    "single_player_end": "单人模式结束！{{player}}在恐怖的万圣节之夜生存了{{minutes}}分{{seconds}}秒！",
+    "multi_player_victory": "恭喜{{player}}成为万圣节之王！你击败了所有恶魔和怪物！",
+    "multi_player_end": "万圣节派对结束！恭喜勇敢的幸存者们：{{players}}！你们战胜了恐惧！",
+    "skill_rescue_platform_triggered": "你触发了救援平台技能！",
+    "fell_into_void": "被TNT炸入虚空",
+    "player_turned_ghost": "{{player}}{{damageType}}，变成了真正的鬼魂！",
+    "player_ghost_remaining": "{{player}}{{damageType}}，变成了真正的鬼魂！还有{{remaining}}个活着的灵魂！",
+    "welcome": "欢迎来到万圣节生存战！右键加入这个恐怖派对吧！",
+    "halloween_music": "万圣节音乐已经开始播放...准备好！",
+    "bat_hit": "你被蝙蝠击中并受到伤害！",
+    "join_success": "成功加入游戏！",
+    "all_blocks_destroyed": "所有方块都被摧毁了！"
+  },
+  "mode": {
+    "solo": "（单人）",
+    "multiplayer": "（多人）",
+    "changed_to_multiplayer": "在{{firstPlayer}}加入后，多人模式开始！"
+  },
+  "stats": {
+    "title": "游戏统计：",
+    "total_games": "总游戏数：{{count}}",
+    "total_wins": "总胜利数：{{count}}",
+    "current_survival": "当前生存：{{minutes}}分{{seconds}}秒",
+    "best_record": "最佳记录：{{minutes}}分{{seconds}}秒",
+    "save_data_error": "保存{{playerName}}的数据时出错",
+    "global_save_error": "保存玩家数据时发生全局错误"
+  },
+  "skill_dash_hit": "你被{{playerName}}的[冲刺]技能击中！",
+  "skill_switched": "已切换技能为{{skill}}！",
+  "skill_cooldown": "技能冷却中，剩余{{time}}秒！",
+  "skill_used": "你使用了{{skill}}技能！",
+  "game_start_countdown": "游戏将在{{countdown}}秒后开始！当前参与者：{{count}}个玩家{{mode}}",
+  "game_start": "游戏开始！祝大家好运！",
+  "game_status": "游戏时间：{{minutes}}分{{seconds}}秒 | 剩余：{{players}}个玩家 | 剩余方块：{{blocks}} | [{{skill}}] {{status}}",
+  "single_player_confirmed": "确认单人模式！",
+  "multi_player_confirmed": "确认多人模式！",
+  "single_player_start": "单人游戏开始！",
+  "multi_player_start": "多人游戏开始！",
+  "bat_summoned": "召唤{{count}}只蝙蝠！",
+  "damage_fell_void": "被TNT炸入虚空",
+  "tag": {
+    "about_to_explode": "即将爆炸"
+  },
+  "damage": {
+    "tnt_explosion": "TNT爆炸",
+    "bat_impact": "被蝙蝠击中"
+  },
+  "error": {
+    "unsupported_element_type": "不支持的元素类型: {{type}}"
+  },
+  "entity": {
+    "bat": {
+      "self_destruct": "正在自毁"
+    }
+  },
+  "cat_trap": {
+    "effect_start": "你被{{player}}的喵陷阱技能击中，10秒内视线模糊",
+    "effect_end": "喵呜效果已解除"
+  },
+  "skill": {
+    "old_shoes": {
+      "name": "老头的疾跑鞋",
+      "introduce": "5秒内增加移动速度和跳跃高度",
+      "notice": "穿上它跑得更快，跳得更高！",
+      "effect_end": "疾跑鞋效果结束"
+    },
+    "heal": {
+      "name": "治疗",
+      "introduce": "恢复70%最大生命值",
+      "notice": "非常有用！"
+    },
+    "dash": {
+      "name": "冲刺",
+      "introduce": "向准星方向冲刺，击中玩家时会击退",
+      "notice": "小心不要冲得太猛！",
+      "hit_message": "你被{{player}}的[冲刺]技能击中！"
+    },
+    "chorus_fruit": {
+      "name": "紫颂果",
+      "introduce": "随机传送到平台上存在的方块上（幸运符）",
+      "notice": "你可能会传送到有裂开警告的方块上！"
+    },
+    "bounce_tnt": {
+      "name": "弹跳TNT",
+      "introduce": "弹飞4格范围内所有TNT和蝙蝠",
+      "notice": "必备团队生存工具，还能弹飞烦人的蝙蝠！"
+    },
+    "safe_platform": {
+      "name": "救援平台",
+      "introduce": "当你掉进虚空时，会在最下方的黄色层生成5×5的平台并救你",
+      "notice": "这是一次性被动技能！无需激活！"
+    },
+    "cat_trap": {
+      "name": "喵陷阱",
+      "introduce": "让10格范围内的所有其他玩家获得喵呜效果，持续10秒",
+      "notice": "如果有三天的喵呜，你会怎么做？答案：我们一起学猫叫"
+    },
+    "spider_man": {
+      "name": "蜘蛛侠",
+      "introduce": "射出蛛丝并弹跳至目标位置，击中玩家或实体时会拉拽",
+      "notice": "像蜘蛛侠一样在竞技场中自由移动！小心不要掉下去！",
+      "web_shot": "射出蛛丝！",
+      "web_pull_hit": "你被{{playerName}}的蛛丝碰到并被拉了过去！",
+      "web_caught": "你被{{playerName}}的蛛丝抓住了！",
+      "miss": "没有命中目标！射击前请瞄准"
+    },
+    "self_sustain": {
+      "name": "自立",
+      "introduce": "每5秒恢复生命值，恢复量逐渐增加，最高5点",
+      "notice": "这是被动技能！无需激活！"
+    }
+  },
+  "skill.default": "默认技能",
+  "gui.skill_status": "技能状态",
+  "tag.about_to_explode": "即将爆炸！",
+  "game.player_scared": "被吓跑了！",
+  "game.remaining_players": " 名剩余玩家",
+  "skill.old_shoes.effect_end": "",
+  "errors": {
+    "bat_explosion": "蝙蝠爆炸错误",
+    "checking_blocks": "检查方块错误",
+    "cleaning_bats": "清理蝙蝠错误",
+    "count_blocks_failed": "计算方块失败",
+    "tnt_timer": "TNT计时器错误",
+    "bat_interval": "蝙蝠生成间隔错误",
+    "cannot_summon_bat": "无法召唤蝙蝠错误"
+  },
+  "skill.spider_man.shoot_web": "射出蛛丝！",
+  "skill.spider_man.pull_message": "你被{{player}}的蛛丝碰到并被拉了过去！",
+  "skill.spider_man.catch_message": "你被{{player}}的蛛丝抓住了！",
+  "skill.spider_man.miss_message": "没有命中目标！射击前请瞄准",
+  "skill.dash.hit_message": "你被{{playerName}}的[冲刺]技能击中！",
+  "skill.cat_trap.effect_start": "你被{{player}}的喵陷阱技能击中，10秒内视线模糊",
+  "skill.cat_trap.effect_end": "喵呜效果已解除",
+  "unit.second": "秒",
+  "skill.use_success": "你使用了{{skill}}技能",
+  "errors.cannot_summon_bat": "无法召唤蝙蝠：",
+  "errors.tnt_timer": "TNT计时器错误：",
+  "errors.checking_blocks": "检查剩余方块错误：",
+  "game.blown_into_void": "被TNT炸入虚空",
+  "error.cleaning_bats": "清理蝙蝠错误"
+}
