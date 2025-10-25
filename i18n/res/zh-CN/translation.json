@@ -29,7 +29,8 @@
     "tnt_explosion": "💣TNT爆炸💥",
     "bat_impact": "🦇被蝙蝠击中💥",
     "fell_void": "💥被TNT炸入虚空🌌",
-    "blown_into_void": "💥被TNT炸入虚空🌌"
+    "blown_into_void": "💥被TNT炸入虚空🌌",
+    "ghost_healing": "👻幽灵治愈 💕"
   },
   "gui": {
     "skill": "🧙‍♂️技能",
@@ -38,7 +39,7 @@
     "skill_status_ready": "🎮可用（游戏中左键使用，右键查看时间）⏱️",
     "skill_status_cooldown": "⏳剩余{{time}}秒🔥",
     "support_modes": "👤支持单人/多人模式👥",
-    "game_features": "🦇游戏中有蝙蝠出现，糖果可修复地形🍬",
+    "game_features": "🦇游戏中有蝙蝠出现，还有恐怖的幽灵👻，糖果可修复地形🍬",
     "candy_terrain_fix": "🍬糖果可修复地形🌱",
     "creation_link": "🔗创作链接：https://dao3.fun/edit/33ad32a019c21f3b36f5💻",
     "game_outside_controls": "🎮游戏外操作指南🎯",
@@ -58,7 +59,7 @@
     "cancel": "❌取消🚫",
     "game_guide_title": "🎮游戏玩法指南🎯",
     "view_game_rules": "📖查看游戏规则📚",
-    "game_guide_content": "👻万圣节派对玩法说明：\n\n1️⃣ 生存挑战：保持站在地面上，避免掉落虚空\n2️⃣ 小心蝙蝠：🦇蝙蝠会攻击玩家，降低生命值\n3️⃣ 收集糖果：🍬拾取糖果获得三种效果：恢复生命❤️、清除蝙蝠🦇或修复地面🧱\n4️⃣ 技能使用：左键使用技能，右键查看游戏信息\n5️⃣ 胜利条件：单人模式生存5分钟🏆，多人模式击败所有对手👑\n\n祝你游戏愉快！🎃",
+    "game_guide_content": "👻万圣节派对玩法说明：\n\n1️⃣ 生存挑战：保持站在地面上，避免掉落虚空\n2️⃣ 小心蝙蝠：🦇蝙蝠会攻击玩家，降低生命值\n3️⃣ 躲避幽灵：👻幽灵会追踪玩家并爆炸，爆炸伤害你\n4️⃣ 收集糖果：🍬拾取糖果获得三种效果：恢复生命❤️、清除蝙蝠🦇或修复地面🧱\n5️⃣ 技能使用：左键使用技能，右键查看游戏信息\n6️⃣ 胜利条件：单人模式生存5分钟🏆，多人模式击败所有对手👑\n\n祝你游戏愉快！🎃",
     "close": "✖️关闭🗙"
   },
   "menu": {
@@ -84,6 +85,7 @@
     "to_game_start": "🎃万圣节派对将在{{seconds}}秒后开始！参与怪物数量：{{playerCount}}{{mode}}👻"
   },
   "game": {
+    "skill_execution_error": "❌技能执行出错，请重试！",
     "damage_taken": "💥{{playerName}}被{{damageType}}，损失{{damage}}点生命值🩸",
     "already_joined": "✅你已经加入游戏了！🎮",
     "player_joined_starting": "🎮{{player}}加入了游戏！本轮将在10秒后开始！⏱️",
@@ -118,7 +120,9 @@
     "halloween_music": "🎶万圣节音乐已经开始播放...准备好！👻",
     "bat_hit": "🦇你被蝙蝠击中并受到伤害！💥",
     "join_success": "✅成功加入游戏！🎮",
-    "all_blocks_destroyed": "💥所有方块都被摧毁了！🧱"
+    "all_blocks_destroyed": "💥所有方块都被摧毁了！🧱",
+    "decoy_created": "🎭可爱替身已成功召唤！✨",
+    "decoy_failed": "❌替身召唤失败，请重试！💫"
   },
   "mode": {
     "solo": "👤（单人）",
@@ -157,6 +161,13 @@
   "entity": {
     "bat": {
       "self_destruct": "💥正在自毁🦇"
+    },
+    "decoy": {
+      "name": "✨可爱替身🎭"
+    },
+    "ghost": {
+      "bounced": "👻你被幽灵弹飞了！快跑！💨",
+      "about_to_explode": "💥幽灵即将爆炸！远离！⚠️"
     }
   },
   "cat_trap": {
@@ -217,6 +228,18 @@
       "name": "💪自立❤️",
       "introduce": "⏱️每5秒恢复生命值，恢复量逐渐增加，最高5点📈",
       "notice": "🔄这是被动技能！无需激活！❌"
+    },
+    "shield_block": {
+      "name": "🛡️魔法护盾✨",
+      "introduce": "🔒获得3秒无敌状态，免疫所有伤害💥",
+      "notice": "⚔️关键时刻使用它来躲避致命伤害！😱",
+      "activated": "✨魔法护盾已激活！你现在是无敌的！🛡️",
+      "deactivated": "💫魔法护盾效果结束💨"
+    },
+    "decoy": {
+      "name": "🎭可爱替身🐱",
+      "introduce": "✨在前方召唤一个会吸引蝙蝠的可爱替身🎭",
+      "notice": "🕐替身持续15秒，可被蝙蝠攻击并摧毁💥"
     }
   },
   "skill.default": "🔄默认技能🎮",
@@ -235,7 +258,10 @@
     "summon_candy": "生成糖果出错",
     "candy_interaction": "糖果交互处理出错",
     "candy_detection": "糖果检测出错",
-    "cleaning_candies": "清理糖果出错"
+    "cleaning_candies": "清理糖果出错",
+    "ghost_update": "👻幽灵更新错误💨",
+    "summon_ghost": "👻生成幽灵出错💨",
+    "ghost_explosion": "👻幽灵爆炸错误💥"
   },
 
   "unit": {

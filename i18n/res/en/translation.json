@@ -29,7 +29,8 @@
     "tnt_explosion": "💣TNT Explosion💥",
     "bat_impact": "🦇Hit by Bat💥",
     "fell_void": "💥Blown into void by TNT🌌",
-    "blown_into_void": "💥Blown into void by TNT🌌"
+    "blown_into_void": "💥Blown into void by TNT🌌",
+    "ghost_healing": "👻Ghost Healing 💕"
   },
   "gui": {
     "skill": "🧙‍♂️Skill",
@@ -38,7 +39,7 @@
     "skill_status_ready": "🎮Available (Left-click to use in game, Right-click to check time)⏱️",
     "skill_status_cooldown": "⏳{{time}} seconds remaining🔥",
     "support_modes": "👤Supports Single/Multiplayer modes👥",
-    "game_features": "🦇Bats appear in game, candy can repair terrain🍬",
+    "game_features": "🦇Bats appear in game, and scary ghosts👻, candy can repair terrain🍬",
     "candy_terrain_fix": "🍬Candy can repair terrain🌱",
     "creation_link": "🔗Creation link: https://dao3.fun/edit/33ad32a019c21f3b36f5💻",
     "game_outside_controls": "🎮Outside Game Controls🎯",
@@ -58,7 +59,7 @@
     "cancel": "❌Cancel🚫",
     "game_guide_title": "🎮Game Guide🎯",
     "view_game_rules": "📖View Game Rules📚",
-    "game_guide_content": "👻Halloween Party Instructions:\n\n1️⃣ Survival Challenge: Stay on the ground, avoid falling into the void\n2️⃣ Watch out for bats: 🦇Bats attack players and reduce health\n3️⃣ Collect candy: 🍬Pick up candy for three effects: heal❤️, clear bats🦇, or repair terrain🧱\n4️⃣ Skills: Left-click to use skill, right-click to check game info\n5️⃣ Victory conditions: Survive 5 minutes in single player🏆, defeat all opponents in multiplayer👑\n\nHave fun!🎃",
+    "game_guide_content": "👻Halloween Party Instructions:\n\n1️⃣ Survival Challenge: Stay on the ground, avoid falling into the void\n2️⃣ Watch out for bats: 🦇Bats attack players and reduce health\n3️⃣ Avoid ghosts: 👻Ghosts will chase players and explode, with a chance to heal or damage you\n4️⃣ Collect candy: 🍬Pick up candy for three effects: heal❤️, clear bats🦇, or repair terrain🧱\n5️⃣ Skills: Left-click to use skill, right-click to check game info\n6️⃣ Victory conditions: Survive 5 minutes in single player🏆, defeat all opponents in multiplayer👑\n\nHave fun!🎃",
     "close": "✖️Close🗙"
   },
   "menu": {
@@ -96,6 +97,7 @@
     "multi_player_mode": "👥(Monster Mayhem Mode)👻",
     "single_player_mode_simple": "👤(Single)",
     "multi_player_mode_simple": "👥(Multi)",
+    "skill_execution_error": "❌Skill execution error, please try again!",
     "confirm_single_player": "✅Single Player Mode Confirmed!👤",
     "confirm_multi_player": "✅Multiplayer Mode Confirmed!👥",
     "game_start": "🎮{{mode}} Game Start!🚀",
@@ -118,7 +120,9 @@
     "halloween_music": "🎶Halloween music has started playing... Get ready!👻",
     "bat_hit": "🦇You were hit by a bat and took damage!💥",
     "join_success": "✅Successfully joined the game!🎮",
-    "all_blocks_destroyed": "💥All blocks have been destroyed!🧱"
+    "all_blocks_destroyed": "💥All blocks have been destroyed!🧱",
+    "decoy_created": "🎭Cute decoy successfully summoned!✨",
+    "decoy_failed": "❌Decoy summoning failed, please try again!💫"
   },
   "mode": {
     "solo": "👤(Single)",
@@ -157,6 +161,13 @@
   "entity": {
     "bat": {
       "self_destruct": "💥Self-destructing🦇"
+    },
+    "decoy": {
+      "name": "✨Cute Decoy🎭"
+    },
+    "ghost": {
+      "bounced": "👻You were bounced by a ghost! Run!💨",
+      "about_to_explode": "💥Ghost about to explode! Stay away!⚠️"
     }
   },
   "cat_trap": {
@@ -217,6 +228,18 @@
       "name": "💪Self-Sustain❤️",
       "introduce": "⏱️Restores HP every 5 seconds, recovery amount gradually increases up to 5 points📈",
       "notice": "🔄This is a passive skill! No activation needed!❌"
+    },
+    "shield_block": {
+      "name": "🛡️Magic Shield✨",
+      "introduce": "🔒Gain 3 seconds of invincibility, immune to all damage💥",
+      "notice": "⚔️Use it at critical moments to avoid fatal damage!😱",
+      "activated": "✨Magic Shield activated! You are now invincible!🛡️",
+      "deactivated": "💫Magic Shield effect ended💨"
+    },
+    "decoy": {
+      "name": "🎭Cute Decoy🐱",
+      "introduce": "✨Summon a cute decoy in front that attracts bats🎭",
+      "notice": "🕐Decoy lasts 15 seconds, can be attacked and destroyed by bats💥"
     }
   },
   "skill.default": "🔄Default Skill🎮",
@@ -235,7 +258,10 @@
     "summon_candy": "Error summoning candy",
     "candy_interaction": "Candy interaction processing error",
     "candy_detection": "Candy detection error",
-    "cleaning_candies": "Error cleaning candies"
+    "cleaning_candies": "Error cleaning candies",
+    "ghost_update": "👻Ghost update error💨",
+    "summon_ghost": "👻Error summoning ghost💨",
+    "ghost_explosion": "👻Ghost explosion error💥"
   },
 
   "unit": {

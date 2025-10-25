@@ -2,122 +2,6 @@
 /* eslint-disable */
 
 import i18n from '../../i18n';
-
-// 移除历史保存功能
-
-// 提供运行时保护性默认对象，防止在非完整运行环境（比如编辑器静态检查）时报错。
-if (typeof (globalThis as any).gui === 'undefined') {
-  (globalThis as any).gui = {
-    init: function () {},
-    setAttribute: function () {},
-    ElementTypes: {},
-    Colors: {},
-    onClickMessage: function (selector: any, name: any) {
-      return {
-        action: 'sendMessage',
-        messageName: name,
-        event: 'click',
-        selector: selector,
-      };
-    },
-    xmlElement: function (attributes: any) {
-      if (typeof attributes === 'string') return attributes;
-      return '';
-    },
-  };
-}
-
-if (typeof (globalThis as any).voxels === 'undefined') {
-  (globalThis as any).voxels = {
-    setVoxel: function () {},
-    getVoxelId: function () {
-      return 0;
-    },
-    name: function () {
-      return 'air';
-    },
-  };
-}
-
-// world.storage 可能不存在，添加空实现以避免调用时报错（实际运行时会被引擎提供）
-if (typeof (globalThis as any).world !== 'undefined') {
-  if (typeof (globalThis as any).world.storage === 'undefined') {
-    (globalThis as any).world.storage = {
-      getItem: async function () {
-        return null;
-      },
-      setItem: async function () {
-        return;
-      },
-    };
-  }
-}
-
-if (typeof (globalThis as any).GameRGBColor === 'undefined') {
-  (globalThis as any).GameRGBColor = function (
-    r: number,
-    g: number,
-    b: number
-  ) {
-    return { r, g, b };
-  };
-}
-
-// 提供 sleep 的默认实现（如果引擎未提供）
-if (typeof (globalThis as any).sleep === 'undefined') {
-  (globalThis as any).sleep = function (ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  };
-}
-
-// minimal world stub: 仅在没有引擎提供 world 时使用，避免加载/编辑环境报错
-if (typeof (globalThis as any).world === 'undefined') {
-  (globalThis as any).world = {
-    storage: {
-      async getItem(_k: string) {
-        return null;
-      },
-      async setItem(_k: string, _v: any) {
-        return;
-      },
-    },
-    onPlayerJoin: function () {},
-    onPlayerLeave: function () {},
-    onTick: function () {},
-    onPress: function () {},
-    say: function (msg: any) {
-      console.log('[world.say]', msg);
-    },
-    querySelectorAll: function () {
-      return [];
-    },
-    createEntity: function () {
-      return {
-        addTag() {},
-        position: { copy() {}, set() {} },
-        destroy() {},
-        onVoxelContact() {},
-        int: null,
-        meshScale: { x: 0, y: 0, z: 0 },
-      };
-    },
-    Time: Date.now(),
-    // 事件处理 helpers
-    _events: {},
-    addEventListener: function (name: string, cb: any) {
-      this._events[name] = this._events[name] || [];
-      this._events[name].push(cb);
-    },
-  };
-}
-
-// 玩家历史记录类
-// PlayerHistory类已删除
-
-// 全局玩家历史记录相关代码已删除
-
-// 保存玩家历史记录相关函数已删除
-
 //GUI代码
 world.onPlayerJoin(({ entity }) => {
   entity.player.enable3DCursor = true;
@@ -252,18 +136,7 @@ gui.GREEN = '#5f5';
 gui.BLUE = '#55f';
 gui.Purple = '#a0a';
 
-function cleanWorldVoxels() {
-  for (let x = 0; x < 128; ) {
-    for (let y = 0; y < 120; ) {
-      for (let z = 0; z < 128; ) {
-        voxels.setVoxel(x, y, z, 'air');
-        z++;
-      }
-      y++;
-    }
-    x++;
-  }
-}
+// cleanWorldVoxels函数已合并到reset函数中
 
 async function changeBlock(x, y, z) {
   voxels.setVoxel(x, y, z, 'exclamation_mark');
@@ -293,7 +166,6 @@ async function randoestroyVoxels(num) {
       }
     }
   }
-
   // 2. 计算各层级的权重 - 越高权重越大（越容易被选中）
   var weightedList = [];
   var maxY = Math.max(...levels);
@@ -328,25 +200,48 @@ async function randoestroyVoxels(num) {
   }
 }
 
-//创建初始平台
-function createVoxelPlatform(y, vox) {
-  let xend = 65 + 50;
+//创建可调整半径的平台 🍬
+function createVoxelPlatform(
+  y,
+  vox,
+  radius = 25,
+  centerX = 65,
+  centerZ = 65,
+  onlyAir = false
+) {
+  let xend = centerX + radius;
   let yend = y + 1;
-  let zend = 65 + 50;
-  for (let x = 65 - 25; x <= xend; x++) {
-    for (let z = 65 - 25; z <= zend; z++) {
-      let dx = x - 65;
-      let dz = z - 65;
-      if (Math.round(Math.sqrt(dx * dx + dz * dz)) <= 25) {
+  let zend = centerZ + radius;
+  for (let x = centerX - radius; x <= xend; x++) {
+    for (let z = centerZ - radius; z <= zend; z++) {
+      let dx = x - centerX;
+      let dz = z - centerZ;
+      if (Math.round(Math.sqrt(dx * dx + dz * dz)) <= radius) {
         for (let y1 = y; y1 < yend; y1++) {
-          voxels.setVoxel(x, y1, z, vox);
+          // 如果设置了onlyAir，只替换空气方块
+          if (!onlyAir || voxels.name(voxels.getVoxelId(x, y1, z)) === 'air') {
+            voxels.setVoxel(x, y1, z, vox);
+          }
         }
       }
     }
   }
 }
 
-function reset() {
+// 合并清空世界和重置平台功能
+function reset(keepVoxels = false) {
+  if (!keepVoxels) {
+    // 清空所有体素
+    for (let x = 0; x < 128; x++) {
+      for (let y = 0; y < 120; y++) {
+        for (let z = 0; z < 128; z++) {
+          voxels.setVoxel(x, y, z, 'air');
+        }
+      }
+    }
+  }
+
+  // 创建初始平台
   createVoxelPlatform(50, 'white_light');
   createVoxelPlatform(40, 'pink_light');
   createVoxelPlatform(30, 'indigo_light');
@@ -378,12 +273,28 @@ function explodeVoxel(position) {
 }
 
 //摧毁玩家
-function explodePlayer(position) {
+function explodePlayer(position, isGhostExplosion = false) {
   for (const k of world.querySelectorAll('player')) {
     if (k.position.distance(position) <= 8) {
-      k.hurt(Math.round(12 / k.position.distance(position)), {
-        damageType: i18n.t('damage.tnt_explosion'),
-      });
+      const damageAmount = Math.round(12 / k.position.distance(position));
+
+      // 如果是幽灵爆炸，有概率将伤害转为少量治疗
+      if (isGhostExplosion && Math.random() < 0.3) {
+        // 30%概率治疗
+        // 治疗量为伤害量的1/3
+        const healAmount = Math.max(1, Math.floor(damageAmount / 3));
+        k.heal(healAmount, {
+          damageType: i18n.t('damage.ghost_healing'),
+        });
+      } else {
+        // 正常造成伤害，但检查无敌状态
+        if (!k.isInvincible) {
+          k.hurt(damageAmount, {
+            damageType: i18n.t('damage.tnt_explosion'),
+          });
+        }
+      }
+
       var direction = k.position.sub(position);
       var dist = direction.mag();
       var speed = 1;
@@ -391,6 +302,133 @@ function explodePlayer(position) {
       k.velocity.z = (direction.z * speed) / dist;
       k.velocity.y += 1.25;
     }
+  }
+}
+
+// 蝙蝠/幽灵追逐目标函数 🎯
+function chaseTarget(entity, targets, maxSpeed = 1.2) {
+  if (!entity.position || !entity.velocity) return;
+
+  // 寻找最近的目标
+  let nearestTarget = null;
+  let nearestDistance = Infinity;
+
+  for (const target of targets) {
+    if (
+      target.position &&
+      target.position.distance(entity.position) < nearestDistance
+    ) {
+      nearestDistance = target.position.distance(entity.position);
+      nearestTarget = target;
+    }
+  }
+
+  // 如果有目标，调整高度并朝向目标
+  if (nearestTarget && nearestTarget.position) {
+    const heightDiff = entity.position.y - nearestTarget.position.y;
+
+    // 根据高度差调整垂直速度
+    if (Math.abs(heightDiff) > 1) {
+      entity.velocity.y = -heightDiff * 0.2;
+      entity.velocity.y = Math.max(-0.5, Math.min(0.5, entity.velocity.y));
+    }
+
+    // 旋转朝向目标
+    rotateTowardsTarget(entity, nearestTarget);
+  }
+}
+
+// 限制实体移动速度函数 🏃‍♂️
+function limitSpeed(entity, maxSpeed) {
+  if (!entity.velocity) return;
+
+  const mag =
+    Math.sqrt(
+      entity.velocity.x * entity.velocity.x +
+        entity.velocity.y * entity.velocity.y +
+        entity.velocity.z * entity.velocity.z
+    ) || 1;
+
+  if (mag > maxSpeed) {
+    entity.velocity.x = (entity.velocity.x / mag) * maxSpeed;
+    entity.velocity.y = (entity.velocity.y / mag) * maxSpeed;
+    entity.velocity.z = (entity.velocity.z / mag) * maxSpeed;
+  }
+}
+
+// 实体朝向目标旋转函数 🔄
+function rotateTowardsTarget(entity, target) {
+  if (!entity.position || !target.position) return;
+
+  // 计算朝向目标的角度
+  const dx = target.position.x - entity.position.x;
+  const dz = target.position.z - entity.position.z;
+  const targetYaw = Math.atan2(dz, dx);
+
+  // 计算当前朝向和目标朝向的差值
+  let currentYaw = entity.rotation?.y || 0;
+  let angleDiff = targetYaw - currentYaw;
+
+  // 处理角度环绕问题
+  while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+  while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+
+  // 限制每秒最大旋转角度
+  const MAX_ROTATION_PER_FRAME = Math.PI / 40;
+  const rotateAmount =
+    Math.sign(angleDiff) *
+    Math.min(Math.abs(angleDiff), MAX_ROTATION_PER_FRAME);
+
+  // 执行旋转
+  if (entity.rotateLocal) {
+    entity.rotateLocal({ x: 0, y: 0, z: 0 }, 'Y', rotateAmount);
+  } else if (entity.rotation) {
+    entity.rotation.y = currentYaw + rotateAmount;
+    // 标准化角度值
+    if (entity.rotation.y > Math.PI) entity.rotation.y -= 2 * Math.PI;
+    if (entity.rotation.y < -Math.PI) entity.rotation.y += 2 * Math.PI;
+  }
+}
+
+// 实体边界检查和反弹函数 🚧
+function checkAndBounceBoundary(entity, minX, maxX, minY, maxY, minZ, maxZ) {
+  if (!entity.position || !entity.velocity) return;
+
+  // 计算中心坐标和半径
+  const centerX = (minX + maxX) / 2;
+  const centerZ = (minZ + maxZ) / 2;
+  const radius = (maxX - minX) / 2;
+
+  // 圆形边界检查（欧拉距离）
+  const dx = entity.position.x - centerX;
+  const dz = entity.position.z - centerZ;
+  const distance = Math.sqrt(dx * dx + dz * dz);
+
+  // 如果距离大于等于半径，进行边界反弹
+  if (distance >= radius) {
+    // 计算边界上的新位置
+    const normalizedDx = dx / distance;
+    const normalizedDz = dz / distance;
+    entity.position.x = centerX + normalizedDx * radius;
+    entity.position.z = centerZ + normalizedDz * radius;
+
+    // 计算反弹方向
+    const dotProduct =
+      entity.velocity.x * normalizedDx + entity.velocity.z * normalizedDz;
+    entity.velocity.x = entity.velocity.x - 2 * dotProduct * normalizedDx;
+    entity.velocity.z = entity.velocity.z - 2 * dotProduct * normalizedDz;
+    entity.velocity.x *= 0.7; // 能量损失
+    entity.velocity.z *= 0.7; // 能量损失
+  }
+
+  // Y轴边界仍然使用原来的矩形边界
+  if (entity.position.y < minY) {
+    entity.position.y = minY;
+    entity.velocity.y = -entity.velocity.y * 0.7;
+  }
+  if (entity.position.y > maxY) {
+    entity.position.y = maxY;
+    entity.velocity.y = -entity.velocity.y * 0.7;
   }
 }
 
@@ -514,6 +552,39 @@ world.onPlayerLeave(async ({ entity }) => {
 
 var skillList = [
   {
+    name: i18n.t('skill.shield_block.name'),
+    introduce: i18n.t('skill.shield_block.introduce'),
+    notice: i18n.t('skill.shield_block.notice'),
+    cold: 25000,
+    async effect(entity, raycast) {
+      // 开启无敌效果 🛡️✨
+      entity.isInvincible = true;
+
+      // 添加视觉效果
+      Object.assign(entity, {
+        particleRate: 50,
+        particleColor: new GameRGBColor(0, 0.8, 1),
+        particleLifetime: 0.5,
+        particleSize: [4, 3, 2, 1, 0.5],
+      });
+
+      // 通知玩家
+      entity.player.directMessage(i18n.t('skill.shield_block.activated'));
+
+      // 3秒后移除无敌效果
+      await sleep(3000);
+
+      // 关闭无敌效果
+      entity.isInvincible = false;
+
+      // 移除视觉效果
+      Object.assign(entity, { particleRate: 0 });
+
+      // 通知玩家效果结束
+      entity.player.directMessage(i18n.t('skill.shield_block.deactivated'));
+    },
+  },
+  {
     name: i18n.t('skill.old_shoes.name'),
     introduce: i18n.t('skill.old_shoes.introduce'),
     notice: i18n.t('skill.old_shoes.notice'),
@@ -555,7 +626,7 @@ var skillList = [
     name: i18n.t('skill.heal.name'),
     introduce: i18n.t('skill.heal.introduce'),
     notice: i18n.t('skill.heal.notice'),
-    cold: 40000,
+    cold: 30000,
     async effect(entity, raycast) {
       entity.hp += 70;
       if (entity.hp > entity.maxHp) {
@@ -567,7 +638,7 @@ var skillList = [
     name: i18n.t('skill.dash.name'),
     introduce: i18n.t('skill.dash.introduce'),
     notice: i18n.t('skill.dash.notice'),
-    cold: 60000,
+    cold: 20000,
     async effect(entity, raycast) {
       if (raycast) {
         var k = raycast.hitPosition;
@@ -592,7 +663,7 @@ var skillList = [
     name: i18n.t('skill.chorus_fruit.name'),
     introduce: i18n.t('skill.chorus_fruit.introduce'),
     notice: i18n.t('skill.chorus_fruit.notice'),
-    cold: 60000,
+    cold: 35000,
     async effect(entity, raycast) {
       var list = [];
       for (let i = 35; i < 85; i++) {
@@ -613,7 +684,7 @@ var skillList = [
     name: i18n.t('skill.bounce_tnt.name'),
     introduce: i18n.t('skill.bounce_tnt.introduce'),
     notice: i18n.t('skill.bounce_tnt.notice'),
-    cold: 60000,
+    cold: 25000,
     async effect(entity, raycast) {
       // 弹走TNT
       for (const k of world.querySelectorAll('.TNT')) {
@@ -626,20 +697,42 @@ var skillList = [
           k.velocity.y += 1;
         }
       }
-      // 弹走蝙蝠
-      for (const bat of world.querySelectorAll('.bat')) {
-        if (
-          bat.position &&
-          entity.position &&
-          bat.position.distance(entity.position) <= 4
-        ) {
-          var direction = bat.position.sub(entity.position);
-          var dist = direction.mag();
-          var speed = 0.8; // 蝙蝠弹得更远一些
-          bat.velocity.x = (direction.x * speed) / dist;
-          bat.velocity.z = (direction.z * speed) / dist;
-          bat.velocity.y += 1.5; // 蝙蝠飞得更高一些
-        }
+
+      // 驱除所有蝙蝠 🦇💨
+      let clearedCount = 0;
+      for (let i = activeBats.length - 1; i >= 0; i--) {
+        const bat = activeBats[i];
+        try {
+          if (bat && !bat.destroyed && bat.position) {
+            // 添加爆炸前的视觉效果
+            Object.assign(bat, {
+              particleRate: 100,
+              particleColor: new GameRGBColor(1, 1, 0),
+              particleLifetime: 0.5,
+              particleSize: [5, 4, 3, 2, 1],
+            });
+            // 延迟执行爆炸和销毁
+            setTimeout(() => {
+              try {
+                if (bat && !bat.destroyed && bat.position) {
+                  // 让蝙蝠在原地爆炸
+                  explodeVoxel(bat.position);
+                  // 清除相关定时器
+                  if (bat.lifespanTimer) clearTimeout(bat.lifespanTimer);
+                  if (bat.movementTimer) clearInterval(bat.movementTimer);
+                  bat.destroy();
+                }
+              } catch (e) {}
+            }, 300);
+            activeBats.splice(i, 1);
+            clearedCount++;
+          }
+        } catch (e) {}
+      }
+
+      // 给玩家发送消息，告知已清除的蝙蝠数量
+      if (clearedCount > 0) {
+        entity.player.directMessage(i18n.t('candy.bats_cleared'));
       }
     },
   },
@@ -657,7 +750,7 @@ var skillList = [
     name: i18n.t('skill.cat_trap.name'),
     introduce: i18n.t('skill.cat_trap.introduce'),
     notice: i18n.t('skill.cat_trap.notice'),
-    cold: 60000,
+    cold: 20000,
     async effect(entity, raycast) {
       world.querySelectorAll('player').forEach(async (k) => {
         if (k.position.distance(entity.position) <= 10) {
@@ -1026,6 +1119,7 @@ var worldTime = 0;
 var gameInterval = null;
 var gameStartTime = 0; // 全局游戏开始时间戳（毫秒）
 var batInterval = null;
+var ghostInterval = null; // 幽灵生成定时器
 const activeBats: any[] = [];
 // 调节TNT生成频率的因子（>1 表示更慢，<1 表示更快）
 var tntSlowFactor = 0.01;
@@ -1037,6 +1131,220 @@ var candyInterval = null;
 const activeCandies: any[] = [];
 const CANDY_LIFETIME = 30000; // 糖果持续时间（毫秒）
 const CANDY_INTERACT_DISTANCE = 3; // 糖果交互距离
+const activeGhosts: any[] = []; // 活跃的幽灵列表 👻
+
+// 生成幽灵函数 - 初始隐身，逐渐显形，碰到玩家会弹飞，最终爆炸 👻
+function summonGhost(count = 1) {
+  try {
+    for (let i = 0; i < count; i++) {
+      // 创建幽灵实体
+      const ghost = world.createEntity({
+        mesh: 'mesh/white.vb', // 使用白色方块作为幽灵模型
+        meshScale: [0.12, 0.12, 0.12], // 幽灵形状 - 已经设置为要求的0.12体积 👻
+        meshEmissive: 0, // 关闭发光效果，使幽灵不发光 👻
+        meshInvisible: false, // 控制幽灵是否隐形，默认显示 👻
+        fixed: false,
+        collides: true,
+        gravity: true, // 给幽灵添加重力 👻
+        position: {
+          x: 30 + Math.random() * 70,
+          y: 25 + Math.random() * 30, // 适当提高生成高度，考虑重力影响
+          z: 30 + Math.random() * 70,
+        },
+      });
+      ghost.addTag('ghost');
+      ghost.isGhost = true;
+
+      // 设置随机速度
+      ghost.velocity = {
+        x: (Math.random() - 0.5) * 0.4,
+        y: (Math.random() - 0.5) * 0.2,
+        z: (Math.random() - 0.5) * 0.4,
+      };
+
+      // 添加到活跃幽灵列表
+      activeGhosts.push(ghost);
+
+      // 初始粒子效果模拟隐身状态
+      Object.assign(ghost, {
+        particleRate: 10,
+        particleColor: new GameRGBColor(0.7, 0.7, 1), // 淡蓝色幽灵粒子
+        particleLifetime: 1.5,
+        particleSize: [3, 3, 3, 2, 1],
+      });
+
+      // 幽灵生命周期管理
+      const maxLifetime = 15000 + Math.random() * 15000; // 15-30秒
+      let elapsedTime = 0;
+      const fadeInDuration = 5000; // 5秒逐渐显形
+      const warningDuration = 3000; // 3秒爆炸警告
+
+      const ghostInterval = setInterval(async () => {
+        try {
+          if (!ghost || ghost.destroyed) {
+            clearInterval(ghostInterval);
+            return;
+          }
+
+          elapsedTime += 100;
+
+          // 1. 移动逻辑
+          // 微随机方向调整
+          ghost.velocity.x += (Math.random() - 0.5) * 0.1;
+          ghost.velocity.y += (Math.random() - 0.5) * 0.05;
+          ghost.velocity.z += (Math.random() - 0.5) * 0.1;
+
+          // 限制速度
+          const maxSpeed = 0.8;
+          const mag =
+            Math.sqrt(
+              ghost.velocity.x * ghost.velocity.x +
+                ghost.velocity.y * ghost.velocity.y +
+                ghost.velocity.z * ghost.velocity.z
+            ) || 1;
+          if (mag > maxSpeed) {
+            ghost.velocity.x = (ghost.velocity.x / mag) * maxSpeed;
+            ghost.velocity.y = (ghost.velocity.y / mag) * maxSpeed;
+            ghost.velocity.z = (ghost.velocity.z / mag) * maxSpeed;
+          }
+
+          // 2. 透明度变化逻辑
+          if (elapsedTime < fadeInDuration) {
+            // 逐渐显形
+            const newOpacity = (elapsedTime / fadeInDuration) * 1;
+            ghost.opacity = newOpacity;
+            // 增加粒子效果表示逐渐显形
+            Object.assign(ghost, {
+              particleRate: Math.floor(newOpacity * 50) + 10,
+              particleColor: new GameRGBColor(0.7, 0.7, 1, newOpacity),
+            });
+          }
+
+          // 3. 爆炸警告阶段
+          if (elapsedTime >= maxLifetime - warningDuration) {
+            // 警告阶段：红色粒子效果，更快的移动
+            ghost.addTag(i18n.t('entity.ghost.about_to_explode'));
+            Object.assign(ghost, {
+              particleRate: 100,
+              particleColor: new GameRGBColor(1, 0.3, 0.3), // 红色警告粒子
+              particleLifetime: 0.5,
+              particleSize: [5, 4, 3, 2, 1],
+            });
+            // 加速移动
+            ghost.velocity.x *= 1.5;
+            ghost.velocity.y *= 1.5;
+            ghost.velocity.z *= 1.5;
+          }
+
+          // 4. 检查玩家碰撞 - 任何阶段碰到玩家都会加速爆炸 👻
+          for (const player of world.querySelectorAll('player')) {
+            if (
+              !player.player.spectator &&
+              player.position &&
+              ghost.position &&
+              player.position.distance
+            ) {
+              const dist = player.position.distance(ghost.position);
+              // 玩家碰到幽灵会加速爆炸
+              if (dist <= 3.0) {
+                // 计算反弹方向
+                const direction = player.position.sub(ghost.position);
+                const dist = direction.mag() || 1;
+
+                // 弹飞玩家
+                player.velocity.x = (direction.x * 1.2) / dist;
+                player.velocity.z = (direction.z * 1.2) / dist;
+                player.velocity.y += 0.8;
+
+                // 给玩家发送消息
+                player.player.directMessage(i18n.t('entity.ghost.bounced'));
+
+                // 幽灵被碰撞后加速爆炸
+                clearInterval(ghostInterval);
+                await explodeGhost(ghost, true); // 传入true表示加速爆炸
+                return;
+              }
+            }
+          }
+
+          // 5. 追逐玩家 - 使用抽象函数实现类似蝙蝠的追逐行为 👻
+          const players = world
+            .querySelectorAll('player')
+            .filter((p) => !p.player.spectator);
+          chaseTarget(ghost, players, 0.8);
+
+          // 6. 限制速度 - 使用抽象函数
+          limitSpeed(ghost, 0.8);
+
+          // 7. 边界检查与反弹 - 使用抽象函数代替直接实现
+          const minX = 40,
+            maxX = 80;
+          const minZ = 40,
+            maxZ = 80;
+          const minY = 10,
+            maxY = 60; // 与蝙蝠行为保持一致 🚀
+          checkAndBounceBoundary(ghost, minX, maxX, minY, maxY, minZ, maxZ);
+
+          // 8. 旋转朝向目标 - 使用抽象函数
+          const nearestPlayer = players.reduce((nearest, current) => {
+            if (!nearest) return current;
+            const nearestDist = nearest.position.distance(ghost.position);
+            const currentDist = current.position.distance(ghost.position);
+            return currentDist < nearestDist ? current : nearest;
+          }, null);
+
+          if (nearestPlayer) {
+            rotateTowardsTarget(ghost, nearestPlayer);
+          }
+
+          // 6. 生命周期结束，爆炸
+          if (elapsedTime >= maxLifetime) {
+            clearInterval(ghostInterval);
+            await explodeGhost(ghost);
+          }
+        } catch (e) {
+          console.warn(i18n.t('errors.ghost_update'), e);
+        }
+      }, 100);
+    }
+  } catch (e) {
+    console.warn(i18n.t('errors.summon_ghost'), e);
+  }
+}
+
+// 幽灵爆炸函数
+async function explodeGhost(ghost, accelerated = false) {
+  try {
+    if (!ghost || ghost.destroyed) return;
+
+    // 爆炸前的视觉效果
+    Object.assign(ghost, {
+      particleRate: 200,
+      particleColor: new GameRGBColor(1, 0, 0),
+      particleLifetime: 0.3,
+      particleSize: [8, 6, 4, 2, 1],
+    });
+
+    // 如果是加速爆炸，减少延迟时间
+    const delay = accelerated ? 200 : 500;
+    await sleep(delay);
+
+    // 执行爆炸效果，传递isGhostExplosion参数以启用概率治疗功能
+    explodeVoxel(ghost.position);
+    explodePlayer(ghost.position, true); // true表示这是幽灵爆炸
+
+    // 从活跃列表中移除
+    const index = activeGhosts.indexOf(ghost);
+    if (index > -1) {
+      activeGhosts.splice(index, 1);
+    }
+
+    // 销毁幽灵
+    ghost.destroy();
+  } catch (e) {
+    console.warn(i18n.t('errors.ghost_explosion'), e);
+  }
+}
 
 // 召唤一只会飞的蝙蝠，随机移动，撞玩家扣血，撞方块触发爆炸，并有生存时间限制
 function summonBat(count = 1) {
@@ -1118,8 +1426,8 @@ function summonBat(count = 1) {
 
           // 简单移动
           if (bat.position && bat.velocity) {
-            // 寻找最近的玩家并匹配其高度
-            let nearestPlayer = null;
+            // 寻找最近的目标（玩家或替身）并匹配其高度
+            let nearestTarget = null;
             let nearestDistance = Infinity;
 
             // 找到最近的非观战玩家
@@ -1132,55 +1440,68 @@ function summonBat(count = 1) {
                 p.position.distance(bat.position) < nearestDistance
               ) {
                 nearestDistance = p.position.distance(bat.position);
-                nearestPlayer = p;
+                nearestTarget = p;
               }
             }
 
-            // 如果有玩家，调整蝙蝠高度以匹配玩家并朝向玩家
-            if (nearestPlayer && nearestPlayer.position) {
-              const heightDiff = bat.position.y - nearestPlayer.position.y;
+            // 如果有目标（玩家或替身），调整蝙蝠高度以匹配目标并朝向目标
+            if (nearestTarget && nearestTarget.position) {
+              const heightDiff = bat.position.y - nearestTarget.position.y;
 
               // 根据高度差调整蝙蝠的垂直速度
               if (Math.abs(heightDiff) > 1) {
                 // 只有当高度差大于1格时才调整
-                // 向玩家高度靠拢
+                // 向目标高度靠拢
                 bat.velocity.y = -heightDiff * 0.2; // 比例调整，高度差越大，调整越快
 
                 // 限制垂直速度范围，避免过快或过慢
                 bat.velocity.y = Math.max(-0.5, Math.min(0.5, bat.velocity.y));
               }
 
-              // 计算蝙蝠朝向最近玩家的角度
-              const dx = nearestPlayer.position.x - bat.position.x;
-              const dz = nearestPlayer.position.z - bat.position.z;
+              // 计算蝙蝠朝向最近目标的角度（提高精度）
+              const dx = nearestTarget.position.x - bat.position.x;
+              const dz = nearestTarget.position.z - bat.position.z;
+              const distance = Math.sqrt(dx * dx + dz * dz);
 
-              // 计算水平方向的角度（y轴旋转）
-              // Math.atan2返回弧度值，需要转换为游戏引擎使用的角度值
-              const yaw = Math.atan2(dz, dx); // 计算水平旋转角度
+              // 计算水平方向的旋转角度（弧度）
+              const targetYaw = Math.atan2(dz, dx);
 
-              // 设置蝙蝠的朝向
-              // 假设实体有rotation属性，其中rotation.y控制水平朝向
-              if (bat.rotation) {
-                bat.rotation.y = yaw; // 设置水平旋转
+              // 计算当前朝向和目标朝向的差值
+              let currentYaw = bat.rotation?.y || 0;
+              let angleDiff = targetYaw - currentYaw;
 
-                // 可选：根据高度差调整俯仰角（rotation.x）
-                if (Math.abs(heightDiff) > 0.5) {
-                  const pitch = Math.atan2(
-                    heightDiff,
-                    Math.sqrt(dx * dx + dz * dz)
-                  );
-                  bat.rotation.x = pitch; // 设置俯仰角
-                }
+              // 更精确地处理角度环绕问题，确保旋转是最短路径
+              while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+              while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+
+              // 限制每秒最大旋转角度为90度（π/2弧度）
+              // 假设游戏主循环大约每50ms执行一次，那么每帧最大旋转量为：
+              // π/2弧度/秒 ÷ 20帧/秒 = π/40弧度/帧 ≈ 0.0785弧度/帧
+              const MAX_ROTATION_PER_FRAME = Math.PI / 40; // 约0.0785弧度/帧
+
+              // 计算旋转量，确保不会超过最大限制
+              const rotateAmount =
+                Math.sign(angleDiff) *
+                Math.min(Math.abs(angleDiff), MAX_ROTATION_PER_FRAME);
+
+              // 使用rotateLocal方法进行精确的水平旋转
+              if (bat.rotateLocal) {
+                bat.rotateLocal({ x: 0, y: 0, z: 0 }, 'Y', rotateAmount);
+              } else if (bat.rotation) {
+                // 改进的回退方案：确保旋转后的值在正确范围内
+                bat.rotation.y = currentYaw + rotateAmount;
+                // 标准化回退后的角度值
+                if (bat.rotation.y > Math.PI) bat.rotation.y -= 2 * Math.PI;
+                if (bat.rotation.y < -Math.PI) bat.rotation.y += 2 * Math.PI;
               }
             }
-
             // 应用移动
             bat.position.x += bat.velocity.x;
             bat.position.y += bat.velocity.y;
             bat.position.z += bat.velocity.z;
           }
 
-          // 限定飞行边界并在越界时反弹（x,z: 40..80, y: batMinY..batMaxY）
+          // 限定飞行边界并在越界时反弹（使用圆形边界）🎯
           try {
             const minX = 40,
               maxX = 80,
@@ -1188,34 +1509,15 @@ function summonBat(count = 1) {
               maxZ = 80;
             const minY = batMinY,
               maxY = batMaxY;
-            if (bat.position.x < minX) {
-              bat.position.x = minX;
-              bat.velocity.x = -bat.velocity.x * 0.7;
-            }
-            if (bat.position.x > maxX) {
-              bat.position.x = maxX;
-              bat.velocity.x = -bat.velocity.x * 0.7;
-            }
-            if (bat.position.z < minZ) {
-              bat.position.z = minZ;
-              bat.velocity.z = -bat.velocity.z * 0.7;
-            }
-            if (bat.position.z > maxZ) {
-              bat.position.z = maxZ;
-              bat.velocity.z = -bat.velocity.z * 0.7;
-            }
-            if (bat.position.y < minY) {
-              bat.position.y = minY;
-              bat.velocity.y = -bat.velocity.y * 0.7;
-            }
-            if (bat.position.y > maxY) {
-              bat.position.y = maxY;
-              bat.velocity.y = -bat.velocity.y * 0.7;
-            }
+
+            // 使用与幽灵相同的边界检查函数 🌟
+            checkAndBounceBoundary(bat, minX, maxX, minY, maxY, minZ, maxZ);
           } catch (e) {
             // 忽略边界修正错误
           }
-          // 检查与玩家的碰撞与追踪行为
+          // 检查与目标（玩家或替身）的碰撞与追踪行为
+
+          // 先检查所有玩家
           for (const p of world.querySelectorAll('player')) {
             try {
               // 只考虑非观战玩家
@@ -1234,8 +1536,8 @@ function summonBat(count = 1) {
                   // 短暂延迟后自爆
                   await sleep(300);
 
-                  // 对玩家造成伤害
-                  if (p.hurt)
+                  // 对玩家造成伤害，但检查无敌状态
+                  if (p.hurt && !p.isInvincible)
                     p.hurt(3, { damageType: i18n.t('damage.bat_impact') });
                   // 只给被击中的玩家发送消息，不再广播给所有人
                   p.player.directMessage(i18n.t('game.bat_hit'));
@@ -1297,6 +1599,89 @@ function summonBat(count = 1) {
             }
           }
 
+          // 再检查所有替身
+          for (let i = activeDecoys.length - 1; i >= 0; i--) {
+            const decoy = activeDecoys[i];
+            try {
+              if (
+                decoy &&
+                !decoy.destroyed &&
+                decoy.position &&
+                bat.position &&
+                decoy.position.distance
+              ) {
+                const dist = decoy.position.distance(bat.position);
+                // 当距离替身4格范围内时，蝙蝠会自爆（距离玩家更远时就会攻击替身，起到吸引效果）
+                if (dist <= 4.0) {
+                  // 自爆前的警告效果
+                  bat.addTag(i18n.t('entity.bat.self_destruct'));
+
+                  // 短暂延迟后自爆
+                  await sleep(300);
+
+                  // 对替身造成伤害（实际上是直接销毁替身）
+                  if (decoy.destroy) {
+                    // 为替身添加爆炸效果
+                    explodeVoxel(decoy.position);
+                    decoy.destroy();
+                    // 从活跃列表中移除
+                    activeDecoys.splice(i, 1);
+                  }
+
+                  // 执行自爆
+                  explodeVoxel(bat.position);
+
+                  // 清除生存时间定时器
+                  if (bat.lifespanTimer) clearTimeout(bat.lifespanTimer);
+                  bat.destroy();
+                  clearInterval(t);
+                  break;
+                }
+
+                // 若靠近替身（但未碰撞），蝙蝠会加速追赶
+                const interestRadius = 15; // 替身吸引范围更大
+                if (dist <= interestRadius) {
+                  const heightDiff = bat.position.y - decoy.position.y;
+
+                  // 同一高度时冲锋（高度差小于1格）
+                  if (Math.abs(heightDiff) < 1) {
+                    // 冲锋模式：大幅提高水平速度
+                    bat.velocity.x *= 4.5; // 对替身在速度上更有吸引力
+                    bat.velocity.z *= 4.5;
+                    bat.velocity.y *= 0.5; // 轻微调整垂直速度
+                  } else {
+                    // 普通加速追赶
+                    bat.velocity.x *= 3.0; // 对替身在速度上更有吸引力
+                    bat.velocity.z *= 3.0;
+
+                    // 高度控制 - 向替身高度靠拢
+                    if (Math.abs(heightDiff) > 1) {
+                      // 向替身高度靠拢的速度，与高度差成正比
+                      const heightAdjustment = -heightDiff * 0.4; // 调整系数更大
+                      // 限制调整速度
+                      bat.velocity.y = Math.max(
+                        -0.7,
+                        Math.min(0.7, heightAdjustment)
+                      );
+                    }
+                  }
+                  // 在下一次迭代让速度回落一点，避免指数增长
+                  setTimeout(() => {
+                    try {
+                      // 根据是否进入过冲锋模式调整回落系数
+                      const isCharging = Math.abs(heightDiff) < 1;
+                      bat.velocity.x *= isCharging ? 0.4 : 0.6;
+                      bat.velocity.y *= 0.7;
+                      bat.velocity.z *= isCharging ? 0.4 : 0.6;
+                    } catch (e) {}
+                  }, 800);
+                }
+              }
+            } catch (e) {
+              // 忽略单个替身检查错误
+            }
+          }
+
           // 检查与方块的接触（四周小范围检测）
           try {
             const bx = Math.round(bat.position.x);
@@ -1315,7 +1700,7 @@ function summonBat(count = 1) {
             // 忽略方块检测错误
           }
         } catch (e) {
-          console.warn(i18n.t('errors.bat_interval'), e);
+          // 静默处理蝙蝠移动错误，不再显示错误提示
         }
       }, 100);
     }
@@ -1419,6 +1804,16 @@ async function startGame() {
       summonCandy();
     }
   }, 30000);
+
+  // 每25秒生成幽灵（赛内干扰）
+  if (ghostInterval) clearInterval(ghostInterval);
+  ghostInterval = setInterval(() => {
+    if (worldInGame) {
+      const count = Math.floor(Math.random() * 3) + 1; // 1..3个幽灵
+      summonGhost(count);
+      world.say('👻 幽灵出现了! 小心隐形的威胁...');
+    }
+  }, 25000);
 
   // 添加胜利标记变量
   let isVictory = false;
@@ -1581,27 +1976,23 @@ setInterval(() => {
             if (skill) {
               e.skillCold = skill.cold;
 
-              // 创建5x5平台
+              // 创建5x5平台（使用createVoxelPlatform函数）
               var platformCenterX = Math.floor(Math.random() * 50) + 35;
               var platformCenterZ = Math.floor(Math.random() * 50) + 35;
-
-              for (let x = platformCenterX - 2; x <= platformCenterX + 2; x++) {
-                for (
-                  let z = platformCenterZ - 2;
-                  z <= platformCenterZ + 2;
-                  z++
-                ) {
-                  for (let y = 10; y <= 12; y++) {
-                    voxels.setVoxel(x, y, z, 'yellow_light');
-                  }
-                }
-              }
+              createVoxelPlatform(
+                10,
+                'yellow_light',
+                2,
+                platformCenterX,
+                platformCenterZ
+              );
 
               e.position.set(platformCenterX, 12, platformCenterZ);
               e.player.directMessage(
                 i18n.t('game.skill_rescue_platform_triggered')
               );
             } else {
+              // 移除虚空伤害的无敌状态检查
               e.hurt(999, { damageType: i18n.t('game.fell_into_void') });
             }
           } catch (error) {
@@ -1609,6 +2000,7 @@ setInterval(() => {
             e.hurt(999, { damageType: i18n.t('game.fell_into_void') });
           }
         } else {
+          // 移除虚空伤害的无敌状态检查
           e.hurt(999, { damageType: i18n.t('game.blown_into_void') });
         }
       } else {
@@ -1740,6 +2132,10 @@ async function gameOver() {
     clearInterval(candyInterval);
     candyInterval = null;
   }
+  if (ghostInterval) {
+    clearInterval(ghostInterval);
+    ghostInterval = null;
+  }
 
   // 销毁所有残留的蝙蝠实体
   try {
@@ -1769,6 +2165,21 @@ async function gameOver() {
     console.warn(i18n.t('errors.cleaning_candies'), e);
   }
 
+  // 销毁所有残留的幽灵实体
+  try {
+    activeGhosts.forEach((g) => {
+      try {
+        if (g && g.destroy) {
+          if (g.ghostInterval) clearInterval(g.ghostInterval);
+          g.destroy();
+        }
+      } catch (e) {}
+    });
+    activeGhosts.length = 0;
+  } catch (e) {
+    console.warn(i18n.t('errors.ghost_update'), e);
+  }
+
   // 销毁所有TNT实体
   world.querySelectorAll('.TNT').forEach(async (i) => i.destroy());
 
@@ -1791,11 +2202,10 @@ async function gameOver() {
 
   // 等待一段时间后清理世界
   await sleep(2500);
-  await cleanWorldVoxels();
   await reset();
 }
 
-// 生成糖果函数 - 确保糖果不会卡在方块里 🍬
+// 生成糖果函数 - 从空中掉落的糖果 🍬
 function summonCandy() {
   try {
     if (!worldInGame) return;
@@ -1803,72 +2213,20 @@ function summonCandy() {
     // 限制糖果数量，避免过多
     if (activeCandies.length >= 5) return;
 
-    let x, z, y;
-    let attempts = 0;
-    const maxAttempts = 10; // 最多尝试10次找到合适位置
-    let foundValidPosition = false;
+    // 生成随机的x和z坐标，确保在游戏区域内
+    const x = Math.floor(30 + Math.random() * 60);
+    const z = Math.floor(30 + Math.random() * 60);
+    // 设置较高的y坐标，让糖果从空中掉落
+    const y = 80 + Math.random() * 20; // 80-100的高度
 
-    // 尝试找到一个有效的位置
-    while (!foundValidPosition && attempts < maxAttempts) {
-      attempts++;
-
-      // 生成候选位置
-      x = Math.floor(30 + Math.random() * 60);
-      z = Math.floor(30 + Math.random() * 60);
-
-      // 从高处向下查找地面
-      y = 60;
-      let foundGround = false;
-
-      while (y > 0) {
-        const voxelName = voxels.name(voxels.getVoxelId(x, y, z));
-        if (voxelName && voxelName !== 'air') {
-          // 找到地面，检查上方是否有足够空间
-          const groundY = y;
-          const spawnY = groundY + 1;
-
-          // 检查生成位置和上方1格是否都是空气
-          const spawnVoxelName = voxels.name(voxels.getVoxelId(x, spawnY, z));
-          const aboveVoxelName = voxels.name(
-            voxels.getVoxelId(x, spawnY + 1, z)
-          );
-
-          if (spawnVoxelName === 'air' && aboveVoxelName === 'air') {
-            y = spawnY;
-            foundValidPosition = true;
-            foundGround = true;
-            break;
-          } else {
-            // 这个位置上方没有足够空间，继续向下查找
-            y--;
-          }
-        } else {
-          y--;
-        }
-      }
-    }
-
-    // 如果尝试了多次还没找到，就使用默认位置但确保上方有空间
-    if (!foundValidPosition) {
-      x = 50;
-      z = 50;
-      y = 10;
-      // 确保默认位置是空气
-      if (voxels.name(voxels.getVoxelId(x, y, z)) !== 'air') {
-        // 如果不是空气，就找最近的空气方块
-        while (y < 60 && voxels.name(voxels.getVoxelId(x, y, z)) !== 'air') {
-          y++;
-        }
-      }
-    }
-
-    // 创建糖果实体 - 现在有重力效果啦 🌟
+    // 创建糖果实体 - 从空中掉落的糖果 🍬
     const candy = world.createEntity({
       mesh: 'mesh/candy.vb', // 假设有糖果模型，如果没有可以使用其他模型代替
       meshScale: [0.15, 0.15, 0.15],
-      fixed: false, // 不再固定，允许移动
-      collides: true,
-      gravity: true, // 启用重力，让糖果可以掉落
+      meshEmissive: 0, // 关闭高光效果
+      fixed: false, // 允许移动
+      collides: false, // 设置为false让玩家可以穿过糖果 🍬
+      gravity: true, // 启用重力，让糖果可以正常掉落
       position: { x, y, z },
     });
 
@@ -1899,18 +2257,7 @@ function summonCandy() {
       }
     }, CANDY_LIFETIME);
 
-    // 闪烁效果
-    candy.blinkTimer = setInterval(() => {
-      try {
-        if (candy && !candy.destroyed) {
-          candy.meshEmissive = candy.meshEmissive === 0.5 ? 0.8 : 0.5; // 调整闪烁范围
-        } else {
-          clearInterval(candy.blinkTimer);
-        }
-      } catch (e) {
-        clearInterval(candy.blinkTimer);
-      }
-    }, 500);
+    // 不再使用闪烁效果，保持稳定外观
   } catch (e) {
     console.error(i18n.t('errors.summon_candy'), e);
   }
@@ -2016,15 +2363,14 @@ async function handleCandyInteraction(player, candy) {
           repairY--;
         }
 
-        // 修复该层周围的地面（5x5区域）
+        // 修复该层周围的地面（5x5区域）使用createVoxelPlatform函数
+        createVoxelPlatform(repairY, 'grass', 2, playerX, playerZ, true);
+
+        // 为每个修复的方块添加效果粒子
         for (let x = playerX - 2; x <= playerX + 2; x++) {
           for (let z = playerZ - 2; z <= playerZ + 2; z++) {
-            // 检查是否是空气方块
-            const currentVoxel = voxels.name(voxels.getVoxelId(x, repairY, z));
-            if (currentVoxel === 'air') {
-              voxels.setVoxel(x, repairY, z, 'grass'); // 修复为草方块
-
-              // 添加修复效果粒子
+            // 只在需要修复的位置添加粒子效果
+            if (voxels.name(voxels.getVoxelId(x, repairY, z)) === 'grass') {
               const repairEffect = world.createEntity({
                 mesh: 'mesh/white_light.vb',
                 meshScale: [0.1, 0.1, 0.1],
@@ -2073,5 +2419,5 @@ world.onInteract(async ({ entity, targetEntity }) => {
 });
 
 //运行代码
-cleanWorldVoxels();
+// 直接调用reset()，它现在包含了清空世界和创建平台的功能
 reset();
