@@ -1,10 +1,8 @@
 {
-  "welcome_game": "🎃Welcome to the Halloween Survival Battle!🎃",
   "welcome_ap": "🎮Welcome to ArenaPro!✨",
   "navigator": {
     "language": "🌐Your browser language is: {{language}}👁️"
   },
-  "game_welcome": "🧙‍♂️Welcome to the Halloween Survival Battle! Right-click to join this spooky party!💀",
   "music_hint": "🎶Halloween music has started playing... Get ready!👻",
   "block_cracking": "⚠️Blocks are about to crack randomly, watch your step!💥",
   "candy": {
@@ -19,24 +17,20 @@
     "bats_cleared": "🦇Bats cleared!",
     "terrain_repaired": "🧱Terrain repaired!"
   },
-  "player_joined": "🎮{{playerName}} joined the battle! {{count}} brave souls remaining!👤",
-  "player_left": "😱{{playerName}} got scared away! {{count}} brave souls remaining!🚪",
-  "game_time_minutes": "⏱️This round has been going for {{minutes}} minutes!📈",
-  "game_ending_blocks": "🧱Remaining blocks ≤50, game over!💀",
-  "game_over_all_dead": "💀Game over! All souls have become ghosts! Halloween night wins!👻",
-  "game_over_single_player_win": "🏆{{playerName}} survived 5 minutes in Halloween night! You are a true survival master!🎉",
-  "game_over_single_player_time": "👤Single player mode over! {{playerName}} survived {{minutes}} minutes {{seconds}} seconds in the terrifying Halloween night!🎃",
-  "game_over_multiplayer_last": "👑Congratulations {{playerName}} for becoming the Halloween King! You defeated all demons and monsters!🔥",
-  "game_over_multiplayer_winners": "🎉Halloween party successfully ended! Congratulations to the brave survivors: {{players}}! You conquered fear!👻",
-  "damage_taken": "💥You were {{damageType}}, took {{damage}} damage, remaining HP: {{hp}}🩸",
-  "player_died": "💀{{playerName}} was {{damageType}}, became a real ghost!👻",
-  "player_died_with_remaining": "💀{{playerName}} was {{damageType}}, became a real ghost! {{count}} living souls remaining!🔢",
-  "skill_rescue_platform": "🦸‍♂️You triggered the rescue platform skill!🛟",
-  "skill_speed_shoes_end": "🏃‍♂️Sprint shoes effect ended💨",
-  "skill_meow_trap_hit": "🐱You were hit by {{playerName}}'s Meow Trap skill, vision blurred for 10 seconds😵",
-  "skill_meow_trap_end": "🧹Meow effect removed✨",
-  "player_scared": "😱Got scared away!🚪",
-  "remaining_players": "💀brave souls!👻",
+  "player": {
+    "joined": "🎮{{playerName}} joined the battle! {{count}} brave souls remaining!👤",
+    "died": "💀{{playerName}} was {{damageType}}, became a real ghost!👻",
+    "scared": "😱Got scared away!🚪",
+    "joined_and_game_starting": "🎮{{playerName}} joined the game! Round starting in 10 seconds!⏱️",
+    "already_in_game": "✅{{playerName}} is already in the game!🎮"
+  },
+  "damage": {
+    "taken": "💥You were {{damageType}}, took {{damage}} damage, remaining HP: {{hp}}🩸",
+    "tnt_explosion": "💣TNT Explosion💥",
+    "bat_impact": "🦇Hit by Bat💥",
+    "fell_void": "💥Blown into void by TNT🌌",
+    "blown_into_void": "💥Blown into void by TNT🌌"
+  },
   "gui": {
     "skill": "🧙‍♂️Skill",
     "update_announcement": "📢Update Announcement✨",
@@ -47,15 +41,25 @@
     "game_features": "🦇Bats appear in game, candy can repair terrain🍬",
     "candy_terrain_fix": "🍬Candy can repair terrain🌱",
     "creation_link": "🔗Creation link: https://dao3.fun/edit/33ad32a019c21f3b36f5💻",
+    "game_outside_controls": "🎮Outside Game Controls🎯",
+    "left_click_switch_skill": "🖱️Left Click: Switch Skills✨",
+    "right_click_menu": "🖱️Right Click: Open Main Menu📋",
     "join_game_content": "🎮Join next round? Players joining within 10 seconds enter the same game!⏱️",
     "join_now": "🎯Join Game Now🚀",
     "already_joined": "✅You've already joined the game!🎮",
     "switch_skill_prompt": "🔄You can switch skills, current skill:🎮",
+    "switch_skill_prompt_with_name": "🔄You can switch skills, current skill: {{skill}}🎮",
     "switch_to_skill": "🔄Switch to this skill🎯",
     "switch_skill_success": "🔄Switched skill to {{skill}}✅",
+    "notice": "Notice:",
+    "notice_with_content": "📝Notice: {{content}}",
     "join_game_title": "🎮Join Game👥",
     "join_game_now": "🎯Join Game Now🚀",
-    "cancel": "❌Cancel🚫"
+    "cancel": "❌Cancel🚫",
+    "game_guide_title": "🎮Game Guide🎯",
+    "view_game_rules": "📖View Game Rules📚",
+    "game_guide_content": "👻Halloween Party Instructions:\n\n1️⃣ Survival Challenge: Stay on the ground, avoid falling into the void\n2️⃣ Watch out for bats: 🦇Bats attack players and reduce health\n3️⃣ Collect candy: 🍬Pick up candy for three effects: heal❤️, clear bats🦇, or repair terrain🧱\n4️⃣ Skills: Left-click to use skill, right-click to check game info\n5️⃣ Victory conditions: Survive 5 minutes in single player🏆, defeat all opponents in multiplayer👑\n\nHave fun!🎃",
+    "close": "✖️Close🗙"
   },
   "menu": {
     "game_menu": "🎮Game Menu📋",
@@ -75,17 +79,12 @@
     "no_record": "📝No game records yet, start your first game now!🚀",
     "error": "❌Unable to get history, please try again later.🕰️"
   },
-  "player": {
-    "joined_and_game_starting": "🎮{{playerName}} joined the game! Round starting in 10 seconds!⏱️",
-    "joined": "👤{{playerName}} joined the game! Current participants: {{playerCount}}{{mode}}🔢",
-    "already_in_game": "✅{{playerName}} is already in the game!🎮"
-  },
+
   "countdown": {
     "to_game_start": "🎃Halloween party starts in {{seconds}} seconds! Participant count: {{playerCount}}{{mode}}👻"
   },
   "game": {
     "damage_taken": "💥{{playerName}} was {{damageType}}, lost {{damage}} HP🩸",
-    "start_message": "🎃Halloween battle begins! Ghosts, bats and pumpkin monsters are out! Good luck everyone!🦇",
     "already_joined": "✅You've already joined the game!🎮",
     "player_joined_starting": "🎮{{player}} joined the game! Round starting in 10 seconds!⏱️",
     "countdown": "🎃Halloween party starts in {{countdown}} seconds! Participant count: {{players}}{{mode}}👻",
@@ -110,11 +109,12 @@
     "single_player_end": "👤Single player mode over! {{player}} survived {{minutes}}m {{seconds}}s in the terrifying Halloween night!🎃",
     "multi_player_victory": "👑Congratulations {{player}} for becoming the Halloween King! You defeated all demons and monsters!🔥",
     "multi_player_end": "🎉Halloween party ended! Congratulations to the brave survivors: {{players}}! You conquered fear!👻",
+
+    "player_left_with_remaining": "👤{{player}} got scared away! {{count}} remaining players🔢",
     "skill_rescue_platform_triggered": "🦸‍♂️You triggered the rescue platform skill!🛟",
     "fell_into_void": "💥Blown into void by TNT🌌",
     "player_turned_ghost": "💀{{player}} was {{damageType}}, became a real ghost!👻",
     "player_ghost_remaining": "💀{{player}} was {{damageType}}, became a real ghost! {{remaining}} living souls remaining!🔢",
-    "welcome": "🎃Welcome to the Halloween Survival Battle! Right-click to join this spooky party!👻",
     "halloween_music": "🎶Halloween music has started playing... Get ready!👻",
     "bat_hit": "🦇You were hit by a bat and took damage!💥",
     "join_success": "✅Successfully joined the game!🎮",
@@ -150,10 +150,7 @@
   "tag": {
     "about_to_explode": "💥About to explode⏳"
   },
-  "damage": {
-    "tnt_explosion": "💣TNT Explosion💥",
-    "bat_impact": "🦇Hit by Bat💥"
-  },
+
   "error": {
     "unsupported_element_type": "❌Unsupported element type: {{type}}🔧"
   },
@@ -173,6 +170,7 @@
       "notice": "🚀Wear them to run faster and jump higher!🦘",
       "effect_end": "🏃‍♂️Sprint shoes effect ended💨"
     },
+    "use_success": "🎮You used {{skill}} skill✨",
     "heal": {
       "name": "❤️‍🩹Heal✨",
       "introduce": "💚Restores 70% of max HP📈",
@@ -181,7 +179,8 @@
     "dash": {
       "name": "🏃‍♂️Dash💨",
       "introduce": "🎯Dash towards crosshair direction, knocks back hit players💥",
-      "notice": "⚠️Be careful not to dash too hard!🏃‍♂️"
+      "notice": "⚠️Be careful not to dash too hard!🏃‍♂️",
+      "hit_message": "💥You were hit by {{playerName}}'s [Dash] skill!🏃‍♂️"
     },
     "chorus_fruit": {
       "name": "🍇Chorus Fruit✨",
@@ -201,12 +200,18 @@
     "cat_trap": {
       "name": "🐱Meow Trap🕳️",
       "introduce": "🐱Gives all other players within 10 blocks Meow effect for 10 seconds😵",
-      "notice": "🐱What would you do with three days of meowing? Answer: Let's learn to meow together🎤"
+      "notice": "🐱What would you do with three days of meowing? Answer: Let's learn to meow together🎤",
+      "effect_start": "🐱You were hit by {{player}}'s Meow Trap skill, vision blurred for 10 seconds😵",
+      "effect_end": "🧹Meow effect removed✨"
     },
     "spider_man": {
-      "name": "🕷️Spider-Man🦸‍♂️",
-      "introduce": "🕸️Shoots web and bounces to target location, pulls when hitting players or entities🎯",
-      "notice": "🕷️Move freely in the arena like Spider-Man! Be careful not to fall!⚠️"
+      "name": "🕷️Spider-Man",
+      "introduce": "Shoot webs to pull enemies or move quickly",
+      "notice": "Aim at entities or blocks to pull enemies or swing to target",
+      "shoot_web": "🕸️Web shot!🎯",
+      "pull_message": "🕸️You were touched by {{player}}'s web and pulled over!👥",
+      "catch_message": "🕸️You were caught by {{player}}'s web!🔒",
+      "miss_message": "❌No target hit! Aim before shooting🎯"
     },
     "self_sustain": {
       "name": "💪Self-Sustain❤️",
@@ -217,8 +222,7 @@
   "skill.default": "🔄Default Skill🎮",
   "gui.skill_status": "🎮Skill Status📊",
   "tag.about_to_explode": "💥About to explode!⏳",
-  "game.player_scared": "😱Got scared away!🚪",
-  "game.remaining_players": "👤remaining players🔢",
+
   "errors": {
     "bat_explosion": "🦇Bat explosion error💥",
     "checking_blocks": "❌Checking blocks error🧱",
@@ -233,22 +237,11 @@
     "candy_detection": "Candy detection error",
     "cleaning_candies": "Error cleaning candies"
   },
-  "skill.spider_man": {
-    "web_shot": "🕸️Web shot!🎯",
-    "shoot_web": "🕸️Web shot!🎯",
-    "web_pull_hit": "🕸️You were touched by {{playerName}}'s web and pulled over!👥",
-    "web_caught": "🕸️You were caught by {{playerName}}'s web!🔒",
-    "miss": "❌No target hit! Aim before shooting🎯"
+
+  "unit": {
+    "second": "seconds⏱",
+    "cooldown_seconds": "{{time}} seconds⏱"
   },
-  "skill.dash": {
-    "hit_message": "💥You were hit by {{playerName}}'s [Dash] skill!🏃‍♂️"
-  },
-  "skill.cat_trap": {
-    "effect_start": "🐱You were hit by {{player}}'s Meow Trap skill, vision blurred for 10 seconds😵",
-    "effect_end": "🧹Meow effect removed✨"
-  },
-  "unit.second": "⏱️seconds",
-  "skill.use_success": "🎮You used {{skill}} skill✨",
 
   "game.blown_into_void": "💥Blown into void by TNT🌌"
 }

@@ -138,6 +138,11 @@ world.onPlayerJoin(({ entity }) => {
                 <label text="" height="25" y="60" x="10" percentWidth="100" color="#a0a" id="pointshowy"></label>
                 <label text="" height="25" y="90" x="10" percentWidth="100" color="#a0a" id="pointshowz"></label>
             </group>
+            <group percentWidth="100" height="100" y="260">
+                <label text="${i18n.t('gui.game_outside_controls')}" height="35" y="5" x="10" percentWidth="100" color="#55f" fontSize="16"></label>
+                <label text="${i18n.t('gui.left_click_switch_skill')}" height="25" y="40" x="10" percentWidth="100" color="#a0a" fontSize="14"></label>
+                <label text="${i18n.t('gui.right_click_menu')}" height="25" y="70" x="10" percentWidth="100" color="#a0a" fontSize="14"></label>
+            </group>
         </dialog>`,
     },
   });
@@ -498,13 +503,10 @@ world.onPlayerLeave(async ({ entity }) => {
     PlayerInGame.splice(PlayerInGame.indexOf(entity.player.name), 1);
     if (PlayerInGame.length > 0) {
       world.say(
-        entity.player.name +
-          ' ' +
-          i18n.t('player_scared') +
-          ' ' +
-          PlayerInGame.length +
-          ' ' +
-          i18n.t('game.remaining_players')
+        i18n.t('game.player_left_with_remaining', {
+          player: entity.player.name,
+          count: PlayerInGame.length,
+        })
       );
     }
   }
@@ -847,7 +849,9 @@ world.onPress(async ({ button, entity, raycast }) => {
       }
       const select = await entity.player.dialog({
         type: 'select',
-        content: i18n.t('gui.switch_skill_prompt') + entity.skill,
+        content: i18n.t('gui.switch_skill_prompt_with_name', {
+          skill: entity.skill,
+        }),
         options: list,
       });
       if (select) {
@@ -861,11 +865,9 @@ world.onPress(async ({ button, entity, raycast }) => {
               skill.introduce +
               `\n` +
               'CD:' +
-              skill.cold / 1000 +
-              i18n.t('unit.second') +
+              i18n.t('unit.cooldown_seconds', { time: skill.cold / 1000 }) +
               `\n` +
-              `注意事项:` +
-              skill.notice,
+              i18n.t('gui.notice_with_content', { content: skill.notice }),
             options: [i18n.t('gui.switch_to_skill')],
           });
           if (sel) {
@@ -897,84 +899,105 @@ world.onPress(async ({ button, entity, raycast }) => {
     }
   }
   if (button == 'action1') {
-    //右键查看时间或加入游戏
+    //右键查看时间或加入游戏/规则
     if (!worldInGame) {
-      //赛外 - 加入游戏菜单
-      const joinOption = await entity.player.dialog({
+      //赛外 - 主菜单
+      const mainMenuOption = await entity.player.dialog({
         type: 'select',
         title: i18n.t('gui.join_game_title'),
         content: i18n.t('gui.join_game_content'),
-        options: [i18n.t('gui.join_game_now'), i18n.t('gui.cancel')],
+        options: [
+          i18n.t('gui.join_game_now'),
+          i18n.t('gui.view_game_rules'),
+          i18n.t('gui.cancel'),
+        ],
       });
 
-      if (joinOption && joinOption.index === 0) {
+      // 处理菜单选择
+      if (mainMenuOption) {
         // 立即加入游戏
-        if (!PlayerInGame.includes(entity.player.name)) {
-          PlayerInGame.push(entity.player.name);
-          // 只给自己发送消息，不再广播
-          entity.player.directMessage(i18n.t('game.join_success'));
-        } else {
-          entity.player.directMessage(i18n.t('game.already_joined'));
-          return;
-        }
+        if (mainMenuOption.index === 0) {
+          // 检查是否已加入游戏
+          if (!PlayerInGame.includes(entity.player.name)) {
+            PlayerInGame.push(entity.player.name);
+            // 只给自己发送消息，不再广播
+            entity.player.directMessage(i18n.t('game.join_success'));
 
-        // 删除历史记录功能
-
-        // 首次加入，游戏将在10秒后开始
-        if (PlayerInGame.length === 1) {
-          world.say(
-            i18n.t('game.player_joined_starting', {
-              player: entity.player.name,
-            })
-          );
-          isSinglePlayer = true; // 标记为单人游戏
-
-          // 10秒倒计时提醒
-          let countdown = 10;
-          const countdownInterval = setInterval(() => {
-            countdown--;
-            if (countdown > 0) {
+            // 如果是首次加入，游戏将在10秒后开始
+            if (PlayerInGame.length === 1) {
               world.say(
-                i18n.t('game.countdown', {
-                  countdown,
-                  players: PlayerInGame.length,
+                i18n.t('game.player_joined_starting', {
+                  player: entity.player.name,
+                })
+              );
+              isSinglePlayer = true; // 标记为单人游戏
+
+              // 10秒倒计时提醒
+              let countdown = 10;
+              const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                  world.say(
+                    i18n.t('game.countdown', {
+                      countdown,
+                      players: PlayerInGame.length,
+                      mode: isSinglePlayer
+                        ? i18n.t('game.single_player_mode')
+                        : i18n.t('game.multi_player_mode'),
+                    })
+                  );
+                }
+              }, 1000);
+
+              // 设置10秒后开始游戏的定时器
+              setTimeout(() => {
+                clearInterval(countdownInterval);
+                if (!worldInGame) {
+                  world.say(i18n.t('game.game_started'));
+                  startGame();
+                }
+              }, 10000);
+            } else {
+              // 从单人模式转变为多人模式
+              if (isSinglePlayer && PlayerInGame.length > 1) {
+                world.say(
+                  i18n.t('game.multiplayer_started', {
+                    player: PlayerInGame[0],
+                  })
+                );
+                isSinglePlayer = false;
+              }
+              world.say(
+                i18n.t('game.player_joined', {
+                  player: entity.player.name,
+                  count: PlayerInGame.length,
                   mode: isSinglePlayer
-                    ? i18n.t('game.single_player_mode')
-                    : i18n.t('game.multi_player_mode'),
+                    ? i18n.t('game.single_player_mode_simple')
+                    : i18n.t('game.multi_player_mode_simple'),
                 })
               );
             }
-          }, 1000);
-
-          // 设置10秒后开始游戏的定时器
-          setTimeout(() => {
-            clearInterval(countdownInterval);
-            if (!worldInGame) {
-              world.say(i18n.t('game.game_started'));
-              startGame();
-            }
-          }, 10000);
-        } else {
-          // 从单人模式转变为多人模式
-          if (isSinglePlayer && PlayerInGame.length > 1) {
-            world.say(
-              i18n.t('game.multiplayer_started', { player: PlayerInGame[0] })
-            );
-            isSinglePlayer = false;
+          } else {
+            // 已加入游戏，提示用户
+            entity.player.directMessage(i18n.t('game.already_joined'));
           }
-          world.say(
-            i18n.t('game.player_joined', {
-              player: entity.player.name,
-              count: PlayerInGame.length,
-              mode: isSinglePlayer
-                ? i18n.t('game.single_player_mode_simple')
-                : i18n.t('game.multi_player_mode_simple'),
-            })
-          );
+        }
+        // 查看游戏规则
+        else if (mainMenuOption.index === 1) {
+          await entity.player.dialog({
+            type: 'select',
+            title: i18n.t('gui.game_guide_title'),
+            content: i18n.t('gui.game_guide_content'),
+            options: [i18n.t('gui.close')],
+          });
+        }
+        // 取消操作，不需要处理
+        else if (mainMenuOption.index === 2) {
+          // 什么都不做
         }
       }
     } else {
-      // 赛内查看时间信息
+      // 赛内查看时间信息 - 只显示给右键点击的玩家 🌟
       // 计算真实已进行时间（基于全局开始时间戳）
       const now = Date.now();
       const elapsedMs =
@@ -982,8 +1005,8 @@ world.onPress(async ({ button, entity, raycast }) => {
       const totalSeconds = Math.floor(elapsedMs / 1000);
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
-      // 使用 world.say 在屏幕上方显示赛内信息（不弹对话或私信）
-      world.say(
+      // 使用 directMessage 只向右键点击的玩家显示信息
+      entity.player.directMessage(
         i18n.t('game.game_info', {
           minutes,
           seconds,
@@ -1397,6 +1420,9 @@ async function startGame() {
     }
   }, 30000);
 
+  // 添加胜利标记变量
+  let isVictory = false;
+
   // 游戏主循环
   const maxGameTime = 15 * 60; // 最大游戏时间15分钟
 
@@ -1437,19 +1463,26 @@ async function startGame() {
       }
     }
 
-    // 每5分钟显示进度
-    if (worldTime % 300 === 0 && worldTime > 0) {
-      world.say(i18n.t('game.minutes_passed', { minutes: worldTime / 300 }));
-    }
+    // 移除自动显示进度，玩家可以通过右键自由查看游戏信息
 
     worldTime++;
-    // 每5秒检查一次剩余方块，若小于等于阈值则提前结束并判定剩余玩家为胜者
+    // 每5秒检查一次游戏状态（剩余方块和人数）
     if (worldTime % 5 === 0) {
       try {
+        // 检查剩余方块数量
         const remaining = countBlocks();
         if (remaining <= 50) {
           world.say(i18n.t('game.blocks_remaining_end'));
           // 历史记录功能已删除
+          break;
+        }
+
+        // 检查游戏人数（只在多人模式下有效）
+        if (!isSinglePlayer && PlayerInGame.length === 1) {
+          isVictory = true;
+          world.say(
+            i18n.t('game.multi_player_victory', { player: PlayerInGame[0] })
+          );
           break;
         }
       } catch (e) {
@@ -1479,11 +1512,12 @@ async function startGame() {
   world.querySelectorAll('.TNT').forEach(async (i) => i.destroy());
 
   // 记录完成情况
-  if (PlayerInGame.length === 0) {
+  if (PlayerInGame.length === 0 && !isVictory) {
     world.say(i18n.t('game.game_over_all_dead'));
   } else {
     if (isSinglePlayer) {
       if (worldTime >= 300) {
+        isVictory = true;
         world.say(
           i18n.t('game.single_player_victory', { player: PlayerInGame[0] })
         );
@@ -1501,6 +1535,7 @@ async function startGame() {
     } else {
       // 多人游戏特殊处理：只剩一人时明确提示胜利
       if (PlayerInGame.length === 1) {
+        isVictory = true;
         world.say(
           i18n.t('game.multi_player_victory', { player: PlayerInGame[0] })
         );
@@ -1677,6 +1712,7 @@ world.onPlayerJoin(async ({ entity }) => {
         );
         // 在多人模式下只剩一人时，直接让最后一个人胜利
         if (!isSinglePlayer && PlayerInGame.length === 1) {
+          isVictory = true;
           world.say(
             i18n.t('game.multi_player_victory', { player: PlayerInGame[0] })
           );
@@ -1759,7 +1795,7 @@ async function gameOver() {
   await reset();
 }
 
-// 生成糖果函数
+// 生成糖果函数 - 确保糖果不会卡在方块里 🍬
 function summonCandy() {
   try {
     if (!worldInGame) return;
@@ -1767,33 +1803,72 @@ function summonCandy() {
     // 限制糖果数量，避免过多
     if (activeCandies.length >= 5) return;
 
-    // 随机位置，在游戏区域内
-    const x = 40 + Math.random() * 40;
-    const z = 40 + Math.random() * 40;
+    let x, z, y;
+    let attempts = 0;
+    const maxAttempts = 10; // 最多尝试10次找到合适位置
+    let foundValidPosition = false;
 
-    // 找到最高的非空气方块作为y坐标
-    let y = 60; // 从高处开始向下查找
-    let foundGround = false;
-    while (y > 0) {
-      const voxelName = voxels.name(voxels.getVoxelId(x, y, z));
-      if (voxelName && voxelName !== 'air') {
-        y += 1; // 放在方块上方
-        foundGround = true;
-        break;
+    // 尝试找到一个有效的位置
+    while (!foundValidPosition && attempts < maxAttempts) {
+      attempts++;
+
+      // 生成候选位置
+      x = Math.floor(30 + Math.random() * 60);
+      z = Math.floor(30 + Math.random() * 60);
+
+      // 从高处向下查找地面
+      y = 60;
+      let foundGround = false;
+
+      while (y > 0) {
+        const voxelName = voxels.name(voxels.getVoxelId(x, y, z));
+        if (voxelName && voxelName !== 'air') {
+          // 找到地面，检查上方是否有足够空间
+          const groundY = y;
+          const spawnY = groundY + 1;
+
+          // 检查生成位置和上方1格是否都是空气
+          const spawnVoxelName = voxels.name(voxels.getVoxelId(x, spawnY, z));
+          const aboveVoxelName = voxels.name(
+            voxels.getVoxelId(x, spawnY + 1, z)
+          );
+
+          if (spawnVoxelName === 'air' && aboveVoxelName === 'air') {
+            y = spawnY;
+            foundValidPosition = true;
+            foundGround = true;
+            break;
+          } else {
+            // 这个位置上方没有足够空间，继续向下查找
+            y--;
+          }
+        } else {
+          y--;
+        }
       }
-      y--;
     }
 
-    if (!foundGround) y = 10; // 如果没找到地面，默认放在10高度
+    // 如果尝试了多次还没找到，就使用默认位置但确保上方有空间
+    if (!foundValidPosition) {
+      x = 50;
+      z = 50;
+      y = 10;
+      // 确保默认位置是空气
+      if (voxels.name(voxels.getVoxelId(x, y, z)) !== 'air') {
+        // 如果不是空气，就找最近的空气方块
+        while (y < 60 && voxels.name(voxels.getVoxelId(x, y, z)) !== 'air') {
+          y++;
+        }
+      }
+    }
 
-    // 创建糖果实体
+    // 创建糖果实体 - 现在有重力效果啦 🌟
     const candy = world.createEntity({
       mesh: 'mesh/candy.vb', // 假设有糖果模型，如果没有可以使用其他模型代替
       meshScale: [0.15, 0.15, 0.15],
-      meshEmissive: 0.8, // 发光效果
-      fixed: true,
+      fixed: false, // 不再固定，允许移动
       collides: true,
-      gravity: false,
+      gravity: true, // 启用重力，让糖果可以掉落
       position: { x, y, z },
     });
 
@@ -1828,7 +1903,7 @@ function summonCandy() {
     candy.blinkTimer = setInterval(() => {
       try {
         if (candy && !candy.destroyed) {
-          candy.meshEmissive = candy.meshEmissive === 0.8 ? 1.2 : 0.8;
+          candy.meshEmissive = candy.meshEmissive === 0.5 ? 0.8 : 0.5; // 调整闪烁范围
         } else {
           clearInterval(candy.blinkTimer);
         }
@@ -1888,34 +1963,35 @@ async function handleCandyInteraction(player, candy) {
         }, 1000);
         break;
 
-      case 1: // 清除蝙蝠
+      case 1: // 清除场上所有蝙蝠并原地爆炸
         let clearedCount = 0;
-        // 清除玩家周围20格范围内的所有蝙蝠
+        // 清除场上所有蝙蝠
         for (let i = activeBats.length - 1; i >= 0; i--) {
           const bat = activeBats[i];
           try {
-            if (bat && !bat.destroyed && bat.position && player.position) {
-              if (bat.position.distance(player.position) <= 20) {
-                // 添加清除效果
-                Object.assign(bat, {
-                  particleRate: 100,
-                  particleColor: new GameRGBColor(1, 1, 0),
-                  particleLifetime: 0.5,
-                  particleSize: [5, 4, 3, 2, 1],
-                });
-                // 延迟销毁
-                setTimeout(() => {
-                  try {
-                    if (bat && !bat.destroyed) {
-                      if (bat.lifespanTimer) clearTimeout(bat.lifespanTimer);
-                      if (bat.movementTimer) clearInterval(bat.movementTimer);
-                      bat.destroy();
-                    }
-                  } catch (e) {}
-                }, 500);
-                activeBats.splice(i, 1);
-                clearedCount++;
-              }
+            if (bat && !bat.destroyed && bat.position) {
+              // 添加爆炸前的视觉效果
+              Object.assign(bat, {
+                particleRate: 100,
+                particleColor: new GameRGBColor(1, 1, 0),
+                particleLifetime: 0.5,
+                particleSize: [5, 4, 3, 2, 1],
+              });
+              // 延迟执行爆炸和销毁
+              setTimeout(() => {
+                try {
+                  if (bat && !bat.destroyed && bat.position) {
+                    // 让蝙蝠在原地爆炸
+                    explodeVoxel(bat.position);
+                    // 清除相关定时器
+                    if (bat.lifespanTimer) clearTimeout(bat.lifespanTimer);
+                    if (bat.movementTimer) clearInterval(bat.movementTimer);
+                    bat.destroy();
+                  }
+                } catch (e) {}
+              }, 300);
+              activeBats.splice(i, 1);
+              clearedCount++;
             }
           } catch (e) {}
         }
