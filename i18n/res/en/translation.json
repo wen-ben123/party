@@ -10,8 +10,14 @@
   "candy": {
     "collected": "🍬Collected Halloween candy!🎃",
     "terrain_restoring": "🔄Terrain is restoring...🌱",
-    "tnt_increased": "💣But TNT frequency has greatly increased!⚠️",
-    "interact_hint": "🍬Press E to collect candy👆"
+    "interact_hint": "🍬Press E to collect candy👆",
+    "options_title": "🍬Choose candy effect:",
+    "heal": "❤️‍🩹Restore health",
+    "clear_bats": "🦇Clear bats",
+    "repair_terrain": "🧱Repair terrain",
+    "heal_success": "❤️Health restored!",
+    "bats_cleared": "🦇Bats cleared!",
+    "terrain_repaired": "🧱Terrain repaired!"
   },
   "player_joined": "🎮{{playerName}} joined the battle! {{count}} brave souls remaining!👤",
   "player_left": "😱{{playerName}} got scared away! {{count}} brave souls remaining!🚪",
@@ -218,12 +224,18 @@
     "checking_blocks": "❌Checking blocks error🧱",
     "cleaning_bats": "❌Cleaning bats error🦇",
     "count_blocks_failed": "❌Counting blocks failed🧱",
-    "tnt_timer": "❌TNT timer error⏱️",
+    "tnt_timer": "❌TNT timer error:⏱️",
     "bat_interval": "❌Bat spawn interval error🦇",
-    "cannot_summon_bat": "❌Cannot summon bat error🦇"
+    "cannot_summon_bat": "❌Cannot summon bat:🦇",
+    "candy_lifetime": "Candy lifetime processing error",
+    "summon_candy": "Error summoning candy",
+    "candy_interaction": "Candy interaction processing error",
+    "candy_detection": "Candy detection error",
+    "cleaning_candies": "Error cleaning candies"
   },
   "skill.spider_man": {
     "web_shot": "🕸️Web shot!🎯",
+    "shoot_web": "🕸️Web shot!🎯",
     "web_pull_hit": "🕸️You were touched by {{playerName}}'s web and pulled over!👥",
     "web_caught": "🕸️You were caught by {{playerName}}'s web!🔒",
     "miss": "❌No target hit! Aim before shooting🎯"
@@ -237,9 +249,6 @@
   },
   "unit.second": "⏱️seconds",
   "skill.use_success": "🎮You used {{skill}} skill✨",
-  "errors.cannot_summon_bat": "❌Cannot summon bat:🦇",
-  "errors.tnt_timer": "❌TNT timer error:⏱️",
-  "errors.checking_blocks": "❌Checking remaining blocks error:🧱",
-  "game.blown_into_void": "💥Blown into void by TNT🌌",
-  "error.cleaning_bats": "❌Cleaning bats error🦇"
+
+  "game.blown_into_void": "💥Blown into void by TNT🌌"
 }

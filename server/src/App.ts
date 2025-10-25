@@ -370,33 +370,6 @@ function explodeVoxel(position) {
     }
     i++;
   }
-  // 触发 TNT 回调
-  try {
-    _callTNTExplosionCallbacks(position, {});
-  } catch (e) {
-    console.warn('tnt callback call failed', e);
-  }
-}
-
-// TNT/爆炸回调机制：允许注册函数在每次 explodeVoxel 后被调用（例如触发事件、生成实体等）
-const tntExplosionCallbacks: Array<Function> = [];
-function onTNTExplode(callback: Function) {
-  if (typeof callback === 'function') tntExplosionCallbacks.push(callback);
-}
-
-// 调用回调（内部使用）
-function _callTNTExplosionCallbacks(position, meta) {
-  try {
-    for (const cb of tntExplosionCallbacks) {
-      try {
-        cb(position, meta);
-      } catch (e) {
-        console.warn('tnt callback error', e);
-      }
-    }
-  } catch (e) {
-    console.warn('callTNT callbacks failed', e);
-  }
 }
 
 //摧毁玩家
@@ -1036,6 +1009,11 @@ var tntSlowFactor = 0.01;
 // 蝙蝠飞行高度限制（可调）：蝙蝠只会在此区间内生成和飞行
 var batMinY = 10;
 var batMaxY = 60;
+// 糖果相关变量
+var candyInterval = null;
+const activeCandies: any[] = [];
+const CANDY_LIFETIME = 30000; // 糖果持续时间（毫秒）
+const CANDY_INTERACT_DISTANCE = 3; // 糖果交互距离
 
 // 召唤一只会飞的蝙蝠，随机移动，撞玩家扣血，撞方块触发爆炸，并有生存时间限制
 function summonBat(count = 1) {
@@ -1411,6 +1389,14 @@ async function startGame() {
     }
   }, 20000);
 
+  // 每30秒生成一个糖果
+  if (candyInterval) clearInterval(candyInterval);
+  candyInterval = setInterval(() => {
+    if (worldInGame) {
+      summonCandy();
+    }
+  }, 30000);
+
   // 游戏主循环
   const maxGameTime = 15 * 60; // 最大游戏时间15分钟
 
@@ -1714,6 +1700,10 @@ async function gameOver() {
     clearInterval(batInterval);
     batInterval = null;
   }
+  if (candyInterval) {
+    clearInterval(candyInterval);
+    candyInterval = null;
+  }
 
   // 销毁所有残留的蝙蝠实体
   try {
@@ -1724,7 +1714,23 @@ async function gameOver() {
     });
     activeBats.length = 0;
   } catch (e) {
-    console.warn(i18n.t('error.cleaning_bats'), e);
+    console.warn(i18n.t('errors.cleaning_bats'), e);
+  }
+
+  // 销毁所有残留的糖果实体
+  try {
+    activeCandies.forEach((c) => {
+      try {
+        if (c && c.destroy) {
+          if (c.lifespanTimer) clearTimeout(c.lifespanTimer);
+          if (c.blinkTimer) clearInterval(c.blinkTimer);
+          c.destroy();
+        }
+      } catch (e) {}
+    });
+    activeCandies.length = 0;
+  } catch (e) {
+    console.warn(i18n.t('errors.cleaning_candies'), e);
   }
 
   // 销毁所有TNT实体
@@ -1753,9 +1759,243 @@ async function gameOver() {
   await reset();
 }
 
+// 生成糖果函数
+function summonCandy() {
+  try {
+    if (!worldInGame) return;
+
+    // 限制糖果数量，避免过多
+    if (activeCandies.length >= 5) return;
+
+    // 随机位置，在游戏区域内
+    const x = 40 + Math.random() * 40;
+    const z = 40 + Math.random() * 40;
+
+    // 找到最高的非空气方块作为y坐标
+    let y = 60; // 从高处开始向下查找
+    let foundGround = false;
+    while (y > 0) {
+      const voxelName = voxels.name(voxels.getVoxelId(x, y, z));
+      if (voxelName && voxelName !== 'air') {
+        y += 1; // 放在方块上方
+        foundGround = true;
+        break;
+      }
+      y--;
+    }
+
+    if (!foundGround) y = 10; // 如果没找到地面，默认放在10高度
+
+    // 创建糖果实体
+    const candy = world.createEntity({
+      mesh: 'mesh/candy.vb', // 假设有糖果模型，如果没有可以使用其他模型代替
+      meshScale: [0.15, 0.15, 0.15],
+      meshEmissive: 0.8, // 发光效果
+      fixed: true,
+      collides: true,
+      gravity: false,
+      position: { x, y, z },
+    });
+
+    candy.addTag('candy');
+    candy.isCandy = true;
+
+    // 启用互动功能
+    candy.enableInteract = true;
+    candy.interactHint = i18n.t('candy.interact_hint'); // 设置互动提示文字
+    candy.interactRadius = CANDY_INTERACT_DISTANCE; // 设置互动范围
+
+    // 添加到活跃糖果列表
+    activeCandies.push(candy);
+
+    // 设置糖果生命周期
+    candy.lifespanTimer = setTimeout(() => {
+      try {
+        if (candy && !candy.destroyed) {
+          candy.destroy();
+          // 从活跃列表中移除
+          const index = activeCandies.indexOf(candy);
+          if (index > -1) {
+            activeCandies.splice(index, 1);
+          }
+        }
+      } catch (e) {
+        console.warn(i18n.t('errors.candy_lifetime'), e);
+      }
+    }, CANDY_LIFETIME);
+
+    // 闪烁效果
+    candy.blinkTimer = setInterval(() => {
+      try {
+        if (candy && !candy.destroyed) {
+          candy.meshEmissive = candy.meshEmissive === 0.8 ? 1.2 : 0.8;
+        } else {
+          clearInterval(candy.blinkTimer);
+        }
+      } catch (e) {
+        clearInterval(candy.blinkTimer);
+      }
+    }, 500);
+  } catch (e) {
+    console.error(i18n.t('errors.summon_candy'), e);
+  }
+}
+
+// 处理糖果交互
+async function handleCandyInteraction(player, candy) {
+  try {
+    // 显示选项对话框
+    const choice = await player.player.dialog({
+      type: 'select',
+      title: i18n.t('candy.options_title'),
+      content: i18n.t('candy.collected'),
+      options: [
+        i18n.t('candy.heal'),
+        i18n.t('candy.clear_bats'),
+        i18n.t('candy.repair_terrain'),
+      ],
+    });
+
+    if (!choice) return; // 如果玩家取消选择
+
+    // 销毁糖果
+    candy.destroy();
+    // 从活跃列表中移除
+    const index = activeCandies.indexOf(candy);
+    if (index > -1) {
+      activeCandies.splice(index, 1);
+    }
+
+    // 根据选择执行相应功能
+    switch (choice.index) {
+      case 0: // 回血
+        player.hp += 50;
+        if (player.hp > player.maxHp) {
+          player.hp = player.maxHp;
+        }
+        player.player.directMessage(i18n.t('candy.heal_success'));
+        // 添加治愈视觉效果
+        Object.assign(player, {
+          particleRate: 50,
+          particleColor: new GameRGBColor(0, 1, 0),
+          particleLifetime: 1,
+          particleSize: [3, 3, 3, 2, 1],
+        });
+        setTimeout(() => {
+          if (player && !player.destroyed) {
+            Object.assign(player, { particleRate: 0 });
+          }
+        }, 1000);
+        break;
+
+      case 1: // 清除蝙蝠
+        let clearedCount = 0;
+        // 清除玩家周围20格范围内的所有蝙蝠
+        for (let i = activeBats.length - 1; i >= 0; i--) {
+          const bat = activeBats[i];
+          try {
+            if (bat && !bat.destroyed && bat.position && player.position) {
+              if (bat.position.distance(player.position) <= 20) {
+                // 添加清除效果
+                Object.assign(bat, {
+                  particleRate: 100,
+                  particleColor: new GameRGBColor(1, 1, 0),
+                  particleLifetime: 0.5,
+                  particleSize: [5, 4, 3, 2, 1],
+                });
+                // 延迟销毁
+                setTimeout(() => {
+                  try {
+                    if (bat && !bat.destroyed) {
+                      if (bat.lifespanTimer) clearTimeout(bat.lifespanTimer);
+                      if (bat.movementTimer) clearInterval(bat.movementTimer);
+                      bat.destroy();
+                    }
+                  } catch (e) {}
+                }, 500);
+                activeBats.splice(i, 1);
+                clearedCount++;
+              }
+            }
+          } catch (e) {}
+        }
+        player.player.directMessage(i18n.t('candy.bats_cleared'));
+        break;
+
+      case 2: // 修复地面
+        player.player.directMessage(i18n.t('candy.terrain_repairing'));
+        // 找到玩家脚下最近的地面层并修复
+        const playerX = Math.round(player.position.x);
+        const playerZ = Math.round(player.position.z);
+        let repairY = Math.floor(player.position.y);
+
+        // 向下查找最近的地面
+        while (repairY > 0) {
+          const voxelName = voxels.name(
+            voxels.getVoxelId(playerX, repairY, playerZ)
+          );
+          if (voxelName && voxelName !== 'air') {
+            break;
+          }
+          repairY--;
+        }
+
+        // 修复该层周围的地面（5x5区域）
+        for (let x = playerX - 2; x <= playerX + 2; x++) {
+          for (let z = playerZ - 2; z <= playerZ + 2; z++) {
+            // 检查是否是空气方块
+            const currentVoxel = voxels.name(voxels.getVoxelId(x, repairY, z));
+            if (currentVoxel === 'air') {
+              voxels.setVoxel(x, repairY, z, 'grass'); // 修复为草方块
+
+              // 添加修复效果粒子
+              const repairEffect = world.createEntity({
+                mesh: 'mesh/white_light.vb',
+                meshScale: [0.1, 0.1, 0.1],
+                fixed: true,
+                collides: false,
+                position: { x: x, y: repairY + 0.5, z: z },
+              });
+              Object.assign(repairEffect, {
+                particleRate: 50,
+                particleColor: new GameRGBColor(0.5, 1, 0.5),
+                particleLifetime: 0.5,
+                particleSize: [3, 2, 1, 0.5, 0.2],
+              });
+              setTimeout(() => {
+                repairEffect.destroy();
+              }, 500);
+            }
+          }
+        }
+        player.player.directMessage(i18n.t('candy.terrain_repaired'));
+        break;
+    }
+  } catch (e) {
+    console.error(i18n.t('errors.candy_interaction'), e);
+  }
+}
+
+// 使用GameAPI的onInteract事件处理糖果交互
+world.onInteract(async ({ entity, targetEntity }) => {
+  try {
+    // 检查是否为游戏中的玩家和糖果实体
+    if (
+      worldInGame &&
+      PlayerInGame.includes(entity.player.name) &&
+      targetEntity.isCandy
+    ) {
+      // 检查糖果是否在活跃列表中
+      const candyIndex = activeCandies.indexOf(targetEntity);
+      if (candyIndex > -1 && !targetEntity.destroyed) {
+        await handleCandyInteraction(entity, targetEntity);
+      }
+    }
+  } catch (e) {
+    console.error(i18n.t('errors.candy_interaction'), e);
+  }
+});
+
 //运行代码
 cleanWorldVoxels();
 reset();
-
-// 启动提示
-world.say(i18n.t('game.welcome'));
