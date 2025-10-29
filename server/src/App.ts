@@ -10,22 +10,22 @@ world.onPlayerJoin(({ entity }) => {
   gui.init(entity, {
     panel: {
       display: true,
-      data: `<dialog width="300" percentHeight="100" top="60" right="60" id="" >
+      data: `<dialog width="280" percentHeight="100" top="40" right="60" id="" >
             <group percentWidth="100" height="120" y="0">
-                <label text="${i18n.t('gui.skill')}" height="35" y="5"  x="10"  percentWidth="100" color="#55f" fontSize="20"></label>
-                <label text="" height="25" y="35" x="10" percentWidth="100" color="#a0a" id="positionshowdx"></label>
-                <label text="" height="25" y="85" x="10" percentWidth="100" color="#a0a" id="positionshowdz"></label>
+                <label text="${i18n.t('gui.skill')}" height="30" y="5"  x="10"  percentWidth="100" color="#55f" fontSize="16"></label>
+                <label text="" height="25" y="40" x="10" percentWidth="100" color="#a0a" id="positionshowdx" fontSize="14"></label>
+                <label text="" height="25" y="70" x="10" percentWidth="100" color="#a0a" id="positionshowdz" fontSize="14"></label>
             </group>
-            <group percentWidth="100" height="120" y="130">
-                <label text="${i18n.t('gui.update_announcement')}" height="35" y="5"  x="10"  percentWidth="100" color="#55f" fontSize="20"></label>
-                <label text="" height="25" y="50" x="10" percentWidth="100" color="#a0a" id="pointshowx"></label>
-                <label text="" height="25" y="60" x="10" percentWidth="100" color="#a0a" id="pointshowy"></label>
-                <label text="" height="25" y="90" x="10" percentWidth="100" color="#a0a" id="pointshowz"></label>
+            <group percentWidth="100" height="140" y="120">
+                <label text="${i18n.t('gui.update_announcement')}" height="30" y="5"  x="10"  percentWidth="100" color="#55f" fontSize="16"></label>
+                <label text="" height="30" y="40" x="10" percentWidth="100" color="#a0a" id="pointshowx" fontSize="12"></label>
+                <label text="" height="30" y="75" x="10" percentWidth="100" color="#a0a" id="pointshowy" fontSize="12"></label>
+                <label text="" height="30" y="110" x="10" percentWidth="100" color="#a0a" id="pointshowz" fontSize="12"></label>
             </group>
-            <group percentWidth="100" height="100" y="260">
-                <label text="${i18n.t('gui.game_outside_controls')}" height="35" y="5" x="10" percentWidth="100" color="#55f" fontSize="16"></label>
-                <label text="${i18n.t('gui.left_click_switch_skill')}" height="25" y="40" x="10" percentWidth="100" color="#a0a" fontSize="14"></label>
-                <label text="${i18n.t('gui.right_click_menu')}" height="25" y="70" x="10" percentWidth="100" color="#a0a" fontSize="14"></label>
+            <group percentWidth="100" height="90" y="260">
+                <label text="${i18n.t('gui.game_outside_controls')}" height="25" y="5" x="10" percentWidth="100" color="#55f" fontSize="12"></label>
+                <label text="${i18n.t('gui.left_click_switch_skill')}" height="25" y="35" x="10" percentWidth="100" color="#a0a" fontSize="11"></label>
+                <label text="${i18n.t('gui.right_click_menu')}" height="25" y="65" x="10" percentWidth="100" color="#a0a" fontSize="11"></label>
             </group>
         </dialog>`,
     },
@@ -279,13 +279,28 @@ function explodePlayer(position, isGhostExplosion = false) {
       const damageAmount = Math.round(12 / k.position.distance(position));
 
       // 如果是幽灵爆炸，有概率将伤害转为少量治疗
-      if (isGhostExplosion && Math.random() < 0.3) {
-        // 30%概率治疗
+      if (isGhostExplosion && Math.random() < 0.5) {
+        // 50%概率治疗
         // 治疗量为伤害量的1/3
-        const healAmount = Math.max(1, Math.floor(damageAmount / 3));
-        k.heal(healAmount, {
-          damageType: i18n.t('damage.ghost_healing'),
-        });
+        const healAmount = Math.max(1, Math.floor(damageAmount));
+        // 直接增加玩家的hp属性 💕
+        if (k.hp !== undefined) {
+          k.hp += healAmount;
+          // 可以选择在这里设置一个上限，如果有的话
+          // k.hp = Math.min(k.hp, maxHp);
+          // 显示治疗效果 - 只播报给玩家和世界 🌟
+          k.player.directMessage(
+            i18n.t('damage.heal_message', { amount: healAmount })
+          );
+          world.say(
+            i18n.t('damage.heal_broadcast', {
+              playerName: k.player.name,
+              amount: healAmount,
+            })
+          );
+        } else {
+          console.log('尝试治疗玩家，但hp属性不可用');
+        }
       } else {
         // 正常造成伤害，但检查无敌状态
         if (!k.isInvincible) {
@@ -500,17 +515,18 @@ async function summonTNT() {
 
 //重置玩家
 function resetPlayer(entity) {
-  entity.enableDamage = true;
-  entity.maxHp = 100;
-  entity.hp = entity.maxHp;
-  entity.player.enable3DCursor = true;
-  entity.player.runSpeed = 0.3;
-  entity.player.walkSpeed = entity.player.runSpeed;
-  entity.player.canFly = false;
-  entity.player.spectator = false;
-  entity.player.invisible = false;
-  entity.player.showName = true;
-  entity.skillCold = 0;
+  // 重置玩家状态 💕
+  entity.enableDamage = true; // 启用伤害接收
+  entity.maxHp = 100; // 设置最大生命值
+  entity.hp = entity.maxHp; // 恢复满生命值
+  entity.player.enable3DCursor = true; // 启用3D光标
+  entity.player.runSpeed = 0.3; // 跑步速度
+  entity.player.walkSpeed = entity.player.runSpeed; // 走路速度
+  entity.player.canFly = false; // 禁用飞行
+  entity.player.spectator = false; // 退出观战模式
+  entity.player.invisible = false; // 显示玩家
+  entity.player.showName = true; // 显示名字
+  entity.skillCold = 0; // 重置技能冷却 🍬
 }
 
 //观战模式玩家
@@ -590,14 +606,24 @@ var skillList = [
     notice: i18n.t('skill.old_shoes.notice'),
     cold: 15000,
     async effect(entity, raycast) {
-      // 保存原始跳跃高度
+      // 保存原始跳跃相关参数 🌟
       const originalJumpHeight = entity.player.jumpHeight || 1;
+      const originalJumpPower = entity.player.jumpPower || 0.96; // 默认跳跃力度
+      const originalJumpSpeedFactor = entity.player.jumpSpeedFactor || 0.85; // 默认跳跃速度
+      const originalJumpAccelerationFactor =
+        entity.player.jumpAccelerationFactor || 0.55; // 默认跳跃加速率
+      const originalDoubleJumpPower = entity.player.doubleJumpPower || 0.9; // 默认二段跳力度
 
-      // 增加速度
+      // 增加速度 ⚡
       entity.player.runSpeed += 0.4;
       entity.player.walkSpeed = entity.player.runSpeed;
-      // 增加跳跃高度
+      // 增加跳跃高度 🚀
       entity.player.jumpHeight = 2.5; // 默认跳跃高度的2.5倍
+      // 增强跳跃相关参数
+      entity.player.jumpPower = 1.2; // 增加跳跃力度
+      entity.player.jumpSpeedFactor = 1.1; // 增加跳跃速度
+      entity.player.jumpAccelerationFactor = 0.7; // 增加跳跃加速率
+      entity.player.doubleJumpPower = 1.1; // 增加二段跳力度
 
       Object.assign(entity, {
         particleRate: 999,
@@ -613,8 +639,12 @@ var skillList = [
         entity.player.runSpeed -= 0.4;
         entity.player.walkSpeed = entity.player.runSpeed;
       }
-      // 恢复原始跳跃高度
+      // 恢复原始跳跃相关参数
       entity.player.jumpHeight = originalJumpHeight;
+      entity.player.jumpPower = originalJumpPower;
+      entity.player.jumpSpeedFactor = originalJumpSpeedFactor;
+      entity.player.jumpAccelerationFactor = originalJumpAccelerationFactor;
+      entity.player.doubleJumpPower = originalDoubleJumpPower;
 
       entity.player.directMessage(i18n.t('skill.old_shoes.effect_end'));
       Object.assign(entity, {
@@ -741,7 +771,7 @@ var skillList = [
     name: i18n.t('skill.safe_platform.name'),
     introduce: i18n.t('skill.safe_platform.introduce'),
     notice: i18n.t('skill.safe_platform.notice'),
-    cold: 114514000,
+    cold: 5000,
     async effect(entity, raycast) {
       entity.skillCold = 0;
     },
@@ -919,6 +949,55 @@ var skillList = [
       entity.skillCold = 0; // 被动技能无需冷却
     },
   },
+  {
+    name: i18n.t('skill.repairman.name'),
+    introduce: i18n.t('skill.repairman.introduce'),
+    notice: i18n.t('skill.repairman.notice'),
+    cold: 25000,
+    async effect(entity, raycast) {
+      // 创建半径为2的平台
+      const centerX = Math.floor(entity.position.x);
+      const centerZ = Math.floor(entity.position.z);
+
+      // 修复平台：直接在玩家脚下位置生成 🔧
+      // 由于是修复技能，不需要检查是否有非空气方块
+      // 限制平台生成高度范围：最低10，最高60 🌟
+      const nearestPlatformY = Math.floor(
+        Math.max(10, Math.min(60, entity.position.y - 2))
+      ); // 在玩家脚下生成平台，限制高度范围
+
+      // 生成平台方块，使用草方块填充，只替换空气方块 🌱
+      createVoxelPlatform(nearestPlatformY, 'grass', 5, centerX, centerZ, true);
+
+      // 显示平台创建成功消息
+      entity.player.directMessage(i18n.t('skill.repairman.platform_created'));
+
+      // ⚠️ 每次使用扣10血 🩸
+      if (entity.hp > 10) {
+        // 使用正确的hurt方法减少生命值
+        entity.hurt(10, { damageType: i18n.t('skill.repairman.name') });
+        entity.player.directMessage(
+          i18n.t('skill.repairman.health_deducted', { amount: 10 })
+        );
+      } else {
+        // 血量不足时的提示
+        entity.player.directMessage(i18n.t('skill.repairman.low_health'));
+      }
+
+      // ⏰ 每次使用增加5秒冷却时间
+      const repairmanSkill = skillList.find(
+        (skill) => skill.name === i18n.t('skill.repairman.name')
+      );
+      if (repairmanSkill) {
+        repairmanSkill.cold += 5000; // 增加5秒冷却时间
+        entity.player.directMessage(
+          i18n.t('skill.repairman.cooldown_increased', { amount: 5 })
+        );
+      }
+
+      // 移除移动恢复提示 🌟
+    },
+  },
 ];
 
 //获取技能信息
@@ -983,8 +1062,8 @@ world.onPress(async ({ button, entity, raycast }) => {
       }
       var skill = getSkill(entity.skill); // 移除 await，因为 getSkill 不是异步函数
       if (skill) {
-        entity.skillCold = skill.cold;
-        await skill.effect(entity, raycast);
+        await skill.effect(entity, raycast); // 先调用 effect，因为 repairman 技能在这里增加冷却时间
+        entity.skillCold = skill.cold; // 然后再设置冷却时间，这样就能正确应用增加后的值
         entity.player.directMessage(
           i18n.t('skill_used', { skill: entity.skill })
         );
@@ -1090,7 +1169,7 @@ world.onPress(async ({ button, entity, raycast }) => {
         }
       }
     } else {
-      // 赛内查看时间信息 - 只显示给右键点击的玩家 🌟
+      // 赛内查看游戏信息（包含血量）- 只显示给右键点击的玩家 🌟
       // 计算真实已进行时间（基于全局开始时间戳）
       const now = Date.now();
       const elapsedMs =
@@ -1098,13 +1177,20 @@ world.onPress(async ({ button, entity, raycast }) => {
       const totalSeconds = Math.floor(elapsedMs / 1000);
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
+
+      // 获取血量信息
+      const playerHp = entity.hp || 100; // 默认血量为100
+      const maxHp = entity.maxHp || 100; // 默认最大血量为100
+      const healthPercentage = Math.round((playerHp / maxHp) * 100);
+
       // 使用 directMessage 只向右键点击的玩家显示信息
       entity.player.directMessage(
-        i18n.t('game.game_info', {
+        i18n.t('game.game_info_with_health', {
           minutes,
           seconds,
           players: PlayerInGame.length,
           blocks: countBlocks(),
+          current: playerHp,
         })
       );
     }
@@ -1326,7 +1412,9 @@ async function explodeGhost(ghost, accelerated = false) {
     });
 
     // 如果是加速爆炸，减少延迟时间
-    const delay = accelerated ? 200 : 500;
+    let delay = accelerated ? 200 : 500;
+    // 确保延迟时间不为负数 🌟
+    delay = Math.max(0, delay);
     await sleep(delay);
 
     // 执行爆炸效果，传递isGhostExplosion参数以启用概率治疗功能
@@ -1516,7 +1604,6 @@ function summonBat(count = 1) {
             // 忽略边界修正错误
           }
           // 检查与目标（玩家或替身）的碰撞与追踪行为
-
           // 先检查所有玩家
           for (const p of world.querySelectorAll('player')) {
             try {
@@ -1754,11 +1841,11 @@ async function startGame() {
   worldTime = 0;
   worldInGame = true;
 
-  world.querySelectorAll('player').forEach(async (e) => {
+  world.querySelectorAll('player').forEach((e) => {
     e.player.cancelDialogs();
     if (PlayerInGame.includes(e.player.name)) {
       e.position.set(45 + Math.random() * 35, 52.5, 45 + Math.random() * 35);
-      await resetPlayer(e);
+      resetPlayer(e);
     }
   });
 
@@ -1957,7 +2044,7 @@ async function startGame() {
   isSinglePlayer = false; // 重置游戏模式
   playerCount = 0; // 重置playerCount
   await sleep(2500);
-  await cleanWorldVoxels();
+
   await reset();
 }
 
@@ -1966,16 +2053,10 @@ setInterval(() => {
   world.querySelectorAll('*').forEach((e) => {
     if (e.position.y <= -20 || (e.isPlayer && e.position.y >= 100)) {
       if (e.isPlayer) {
-        if (
-          worldInGame &&
-          e.skill === i18n.t('skill.safe_platform.name') &&
-          e.skillCold <= 0
-        ) {
+        if (worldInGame && e.skill === i18n.t('skill.safe_platform.name')) {
           try {
             var skill = getSkill(e.skill);
             if (skill) {
-              e.skillCold = skill.cold;
-
               // 创建5x5平台（使用createVoxelPlatform函数）
               var platformCenterX = Math.floor(Math.random() * 50) + 35;
               var platformCenterZ = Math.floor(Math.random() * 50) + 35;
@@ -1988,8 +2069,10 @@ setInterval(() => {
               );
 
               e.position.set(platformCenterX, 12, platformCenterZ);
+              // 扣除50点生命值
+              e.hurt(30, { damageType: '救生平台消耗' });
               e.player.directMessage(
-                i18n.t('game.skill_rescue_platform_triggered')
+                i18n.t('damage.skill_rescue_platform_triggered')
               );
             } else {
               // 移除虚空伤害的无敌状态检查
@@ -2225,10 +2308,38 @@ function summonCandy() {
       meshScale: [0.15, 0.15, 0.15],
       meshEmissive: 0, // 关闭高光效果
       fixed: false, // 允许移动
-      collides: false, // 设置为false让玩家可以穿过糖果 🍬
+      collides: false, // 初始状态下没有碰撞体积 🍬
       gravity: true, // 启用重力，让糖果可以正常掉落
       position: { x, y, z },
     });
+
+    // 随机时间后恢复碰撞体积（0-2秒内随机）🎯
+    const enableCollideTime = Math.random() * 2000; // 0-2秒随机
+    setTimeout(() => {
+      try {
+        if (candy && !candy.destroyed) {
+          // 恢复碰撞体积
+          candy.collides = true;
+
+          // 添加粒子效果表示碰撞体积已激活 ✨
+          Object.assign(candy, {
+            particleRate: 20,
+            particleColor: new GameRGBColor(0.8, 0.8, 1),
+            particleLifetime: 0.5,
+            particleSize: [2, 2, 2, 1, 1],
+          });
+
+          // 短暂后清除粒子效果
+          setTimeout(() => {
+            if (candy && !candy.destroyed) {
+              Object.assign(candy, { particleRate: 0 });
+            }
+          }, 1000);
+        }
+      } catch (e) {
+        console.warn('启用糖果碰撞体积时出错:', e);
+      }
+    }, enableCollideTime);
 
     candy.addTag('candy');
     candy.isCandy = true;
@@ -2296,6 +2407,12 @@ async function handleCandyInteraction(player, candy) {
           player.hp = player.maxHp;
         }
         player.player.directMessage(i18n.t('candy.heal_success'));
+        // 向世界广播治疗消息 🌟
+        world.say(
+          i18n.t('damage.candy_heal_broadcast', {
+            playerName: player.player.name,
+          })
+        );
         // 添加治愈视觉效果
         Object.assign(player, {
           particleRate: 50,

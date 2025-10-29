@@ -19,18 +19,23 @@
   },
   "player": {
     "joined": "🎮{{playerName}} joined the battle! {{count}} brave souls remaining!👤",
-    "died": "💀{{playerName}} was {{damageType}}, became a real ghost!👻",
+    "died": "💀{{playerName}} was {{damageType}}, became a real spirit!👻",
     "scared": "😱Got scared away!🚪",
     "joined_and_game_starting": "🎮{{playerName}} joined the game! Round starting in 10 seconds!⏱️",
     "already_in_game": "✅{{playerName}} is already in the game!🎮"
   },
   "damage": {
     "taken": "💥You were {{damageType}}, took {{damage}} damage, remaining HP: {{hp}}🩸",
-    "tnt_explosion": "💣TNT Explosion💥",
+    "tnt_explosion": "💣Ghost Explosion💥",
     "bat_impact": "🦇Hit by Bat💥",
     "fell_void": "💥Blown into void by TNT🌌",
     "blown_into_void": "💥Blown into void by TNT🌌",
-    "ghost_healing": "👻Ghost Healing 💕"
+    "ghost_healing": "👻Ghost Explosion 💕",
+    "heal_message": "💕You were spiritually healed, received {{amount}} healing!",
+    "heal_broadcast": "💫{{playerName}} was spiritually healed, received {{amount}} healing!",
+    "candy_heal_broadcast": "🍬{{playerName}} used candy to restore health!",
+    "skill_rescue_platform_triggered": "🛟Rescue Platform activated! But cost 30 health points!💔",
+    "health_info": "❤️Current Health: {{current}}"
   },
   "gui": {
     "skill": "🧙‍♂️Skill",
@@ -39,12 +44,18 @@
     "skill_status_ready": "🎮Available (Left-click to use in game, Right-click to check time)⏱️",
     "skill_status_cooldown": "⏳{{time}} seconds remaining🔥",
     "support_modes": "👤Supports Single/Multiplayer modes👥",
-    "game_features": "🦇Bats appear in game, and scary ghosts👻, candy can repair terrain🍬",
+    "game_features": "🦇Bats appear in game, and mysterious ghosts👻, candy can repair terrain🍬",
     "candy_terrain_fix": "🍬Candy can repair terrain🌱",
     "creation_link": "🔗Creation link: https://dao3.fun/edit/33ad32a019c21f3b36f5💻",
     "game_outside_controls": "🎮Outside Game Controls🎯",
     "left_click_switch_skill": "🖱️Left Click: Switch Skills✨",
     "right_click_menu": "🖱️Right Click: Open Main Menu📋",
+    "right_click_menu_title": "🎮Right Click Menu Options🎯",
+    "right_click_menu_content": "Please select the information you want to view:",
+    "view_game_info": "⏱️View Game Info",
+    "view_health": "❤️View Health",
+    "health_info": "❤️Current Health: {{current}}/{{max}} ({{percentage}}%)",
+    "game_info_with_health": "🎮Game Info🎯\n⏱️Game Time: {{minutes}}m {{seconds}}s\n👥Players: {{players}}\n🧱Remaining Blocks: {{blocks}}\n❤️Current Health: {{current}}",
     "join_game_content": "🎮Join next round? Players joining within 10 seconds enter the same game!⏱️",
     "join_now": "🎯Join Game Now🚀",
     "already_joined": "✅You've already joined the game!🎮",
@@ -59,7 +70,7 @@
     "cancel": "❌Cancel🚫",
     "game_guide_title": "🎮Game Guide🎯",
     "view_game_rules": "📖View Game Rules📚",
-    "game_guide_content": "👻Halloween Party Instructions:\n\n1️⃣ Survival Challenge: Stay on the ground, avoid falling into the void\n2️⃣ Watch out for bats: 🦇Bats attack players and reduce health\n3️⃣ Avoid ghosts: 👻Ghosts will chase players and explode, with a chance to heal or damage you\n4️⃣ Collect candy: 🍬Pick up candy for three effects: heal❤️, clear bats🦇, or repair terrain🧱\n5️⃣ Skills: Left-click to use skill, right-click to check game info\n6️⃣ Victory conditions: Survive 5 minutes in single player🏆, defeat all opponents in multiplayer👑\n\nHave fun!🎃",
+    "game_guide_content": "👻Halloween Party Instructions:\n\n1️⃣ Survival Challenge: Stay on the ground, avoid falling into the void\n2️⃣ Watch out for bats: 🦇Bats attack players and reduce health\n3️⃣ Avoid ghosts: 👻Ghosts will chase players and explode, explosion may damage or heal you\n4️⃣ Collect candy: 🍬Pick up candy for three effects: heal❤️, clear bats🦇, or repair terrain🧱\n5️⃣ Skills: Left-click to use skill, right-click to check game info\n6️⃣ Victory conditions: Survive 5 minutes in single player🏆, defeat all opponents in multiplayer👑\n\nHave fun!🎃",
     "close": "✖️Close🗙"
   },
   "menu": {
@@ -93,6 +104,7 @@
     "multiplayer_started": "👥{{player}} has joined, multiplayer mode begins!🎮",
     "player_joined": "👤{{player}} joined the game! Current players: {{count}}{{mode}}🔢",
     "game_info": "⏱️Game Time: {{minutes}}m {{seconds}}s | Remaining: {{players}} players | Blocks: {{blocks}}🧱",
+    "game_info_with_health": "⏱️Game Time: {{minutes}}m {{seconds}}s | Remaining: {{players}} players | Blocks: {{blocks}}🧱 | Current HP: {{current}}❤️",
     "single_player_mode": "👤(Lone Soul Mode)💀",
     "multi_player_mode": "👥(Monster Mayhem Mode)👻",
     "single_player_mode_simple": "👤(Single)",
@@ -106,7 +118,7 @@
     "summon_bats": "🦇Summoned {{count}} bats!🔮",
     "minutes_passed": "⏱️This round has been going for {{minutes}} minutes!📈",
     "blocks_remaining_end": "🧱Remaining blocks ≤50, game over!💀",
-    "game_over_all_dead": "💀Game over! All souls have become ghosts! Halloween night wins!👻",
+    "game_over_all_dead": "💀Game over! All souls have become spirits! Halloween night wins!👻",
     "single_player_victory": "🏆{{player}} survived 5 minutes in Halloween night! You are a true survival master!🎉",
     "single_player_end": "👤Single player mode over! {{player}} survived {{minutes}}m {{seconds}}s in the terrifying Halloween night!🎃",
     "multi_player_victory": "👑Congratulations {{player}} for becoming the Halloween King! You defeated all demons and monsters!🔥",
@@ -115,9 +127,9 @@
     "player_left_with_remaining": "👤{{player}} got scared away! {{count}} remaining players🔢",
     "skill_rescue_platform_triggered": "🦸‍♂️You triggered the rescue platform skill!🛟",
     "fell_into_void": "💥Blown into void by TNT🌌",
-    "player_turned_ghost": "💀{{player}} was {{damageType}}, became a real ghost!👻",
-    "player_ghost_remaining": "💀{{player}} was {{damageType}}, became a real ghost! {{remaining}} living souls remaining!🔢",
-    "halloween_music": "🎶Halloween music has started playing... Get ready!👻",
+    "player_turned_ghost": "💀{{player}} was {{damageType}}, became a real spirit!👻",
+    "player_ghost_remaining": "💀{{player}} was {{damageType}}, became a real spirit! {{remaining}} living souls remaining!🔢",
+    "halloween_music": "🎶Halloween music has started playing... Get ready for spirits!👻",
     "bat_hit": "🦇You were hit by a bat and took damage!💥",
     "join_success": "✅Successfully joined the game!🎮",
     "all_blocks_destroyed": "💥All blocks have been destroyed!🧱",
@@ -236,10 +248,17 @@
       "activated": "✨Magic Shield activated! You are now invincible!🛡️",
       "deactivated": "💫Magic Shield effect ended💨"
     },
-    "decoy": {
-      "name": "🎭Cute Decoy🐱",
-      "introduce": "✨Summon a cute decoy in front that attracts bats🎭",
-      "notice": "🕐Decoy lasts 15 seconds, can be attacked and destroyed by bats💥"
+    "repairman": {
+      "name": "🔧Repairman",
+      "introduce": "🔧Create a platform with radius 2 at your feet!",
+      "notice": "⚠️You will be immobilized for 3 seconds, but can quickly repair terrain!",
+      "platform_created": "🔧Repair complete! Platform created!",
+      "movement_restored": "✅Movement restored!",
+      "joystick_hidden": "✨Virtual joystick hidden, repairing in place...✨",
+      "joystick_restored": "✨Virtual joystick restored, keep moving!✨",
+      "health_deducted": "💔Repair cost 10 health points!",
+      "low_health": "❤️‍🩹Insufficient health, cannot use Repairman skill!",
+      "cooldown_increased": "⏱️Repairman skill cooldown increased!"
     }
   },
   "skill.default": "🔄Default Skill🎮",
