@@ -26,7 +26,8 @@
   },
   "damage": {
     "taken": "💥You were {{damageType}}, took {{damage}} damage, remaining HP: {{hp}}🩸",
-    "tnt_explosion": "💣Ghost Explosion💥",
+    "tnt_explosion": "💣TNT Explosion💥",
+    "ghost_explosion": "👻Ghost Explosion💥",
     "bat_impact": "🦇Hit by Bat💥",
     "fell_void": "💥Blown into void by TNT🌌",
     "blown_into_void": "💥Blown into void by TNT🌌",
@@ -58,6 +59,7 @@
     "health_info": "❤️Current Health: {{current}}/{{max}} ({{percentage}}%)",
     "game_info_with_health": "🎮Game Info🎯\n⏱️Game Time: {{minutes}}m {{seconds}}s\n👥Players: {{players}}\n🧱Remaining Blocks: {{blocks}}\n❤️Current Health: {{current}}",
     "join_game_content": "🎮Join next round? Players joining within 10 seconds enter the same game!⏱️",
+    "quick_solo_game_content": "🎮Start solo game immediately, no waiting!⚡",
     "join_now": "🎯Join Game Now🚀",
     "already_joined": "✅You've already joined the game!🎮",
     "switch_skill_prompt": "🔄You can switch skills, current skill:🎮",
@@ -68,10 +70,11 @@
     "notice_with_content": "📝Notice: {{content}}",
     "join_game_title": "🎮Join Game👥",
     "join_game_now": "🎯Join Game Now🚀",
+    "quick_solo_game": "👤Quick Solo Game⚡",
     "cancel": "❌Cancel🚫",
     "game_guide_title": "🎮Game Guide🎯",
     "view_game_rules": "📖View Game Rules📚",
-    "game_guide_content": "👻Halloween Party Instructions:\n\n1️⃣ Survival Challenge: Stay on the ground, avoid falling into the void\n2️⃣ Watch out for bats: 🦇Bats attack players and reduce health\n3️⃣ Avoid ghosts: 👻Ghosts will chase players and explode, explosion may damage or heal you\n4️⃣ Collect candy: 🍬Pick up candy for three effects: heal❤️, clear bats🦇, or repair terrain🧱\n5️⃣ Skills: Left-click to use skill, right-click to check game info\n6️⃣ Victory conditions: Survive 5 minutes in single player🏆, defeat all opponents in multiplayer👑\n\nHave fun!🎃",
+    "game_guide_content": "👻Halloween Party Instructions:\n\n1️⃣ Survival Challenge: Stay on the ground, avoid falling into the void\n2️⃣ Watch out for bats: 🦇Bats attack players and reduce health\n3️⃣ Avoid ghosts: 👻Ghosts will chase players and explode, explosion may damage or heal you\n4️⃣ Collect candy: 🍬Pick up candy for three effects: heal❤️, clear bats🦇, or repair terrain🧱\n5️⃣ Skills: Left-click to use skill, right-click to check game info\n6️⃣ Victory conditions: Survive 4 minutes in single player🏆, defeat all opponents in multiplayer👑\n\nHave fun!🎃",
     "close": "✖️Close🗙"
   },
   "menu": {

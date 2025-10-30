@@ -26,7 +26,8 @@
   },
   "damage": {
     "taken": "💥你被{{damageType}}，受到了{{damage}}点伤害，剩余HP：{{hp}}🩸",
-    "tnt_explosion": "💣怨灵波及💥",
+    "tnt_explosion": "💣TNT爆炸💥",
+    "ghost_explosion": "👻幽灵爆炸💥",
     "bat_impact": "🦇被蝙蝠击中💥",
     "fell_void": "💥被TNT炸入虚空🌌",
     "blown_into_void": "💥被TNT炸入虚空🌌",
@@ -58,6 +59,7 @@
     "health_info": "❤️当前血量：{{current}}/{{max}} ({{percentage}}%)",
     "game_info_with_health": "🎮游戏信息🎯\n⏱️游戏时间：{{minutes}}分{{seconds}}秒\n👥玩家数量：{{players}}人\n🧱剩余方块：{{blocks}}个\n❤️当前血量：{{current}}",
     "join_game_content": "🎮是否要加入下一轮游戏？10秒内加入的玩家会进入同一局游戏！⏱️",
+    "quick_solo_game_content": "🎮立即开始单人游戏，无需等待！⚡",
     "join_now": "🎯立即加入游戏🚀",
     "already_joined": "✅你已经加入游戏了！🎮",
     "switch_skill_prompt": "🔄你可以切换技能，当前技能：🎮",
@@ -68,10 +70,11 @@
     "notice_with_content": "📝注意事项：{{content}}",
     "join_game_title": "🎮加入游戏👥",
     "join_game_now": "🎯立即加入游戏🚀",
+    "quick_solo_game": "👤快速开始单人游戏⚡",
     "cancel": "❌取消🚫",
     "game_guide_title": "🎮游戏玩法指南🎯",
     "view_game_rules": "📖查看游戏规则📚",
-    "game_guide_content": "👻万圣节派对玩法说明：\n\n1️⃣ 生存挑战：保持站在地面上，避免掉落虚空\n2️⃣ 小心蝙蝠：🦇蝙蝠会攻击玩家，降低生命值\n3️⃣ 躲避怨灵：👻怨灵会追踪玩家并爆炸，爆炸可能伤害或治愈你\n4️⃣ 收集糖果：🍬拾取糖果获得三种效果：恢复生命❤️、清除蝙蝠🦇或修复地面🧱\n5️⃣ 技能使用：左键使用技能，右键查看游戏信息\n6️⃣ 胜利条件：单人模式生存5分钟🏆，多人模式击败所有对手👑\n\n祝你游戏愉快！🎃",
+    "game_guide_content": "👻万圣节派对玩法说明：\n\n1️⃣ 生存挑战：保持站在地面上，避免掉落虚空\n2️⃣ 小心蝙蝠：🦇蝙蝠会攻击玩家，降低生命值\n3️⃣ 躲避怨灵：👻怨灵会追踪玩家并爆炸，爆炸可能伤害或治愈你\n4️⃣ 收集糖果：🍬拾取糖果获得三种效果：恢复生命❤️、清除蝙蝠🦇或修复地面🧱\n5️⃣ 技能使用：左键使用技能，右键查看游戏信息\n6️⃣ 胜利条件：单人模式生存4分钟🏆，多人模式击败所有对手👑\n\n祝你游戏愉快！🎃",
     "close": "✖️关闭🗙"
   },
   "menu": {

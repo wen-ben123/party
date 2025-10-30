@@ -185,7 +185,7 @@ async function randoestroyVoxels(num) {
     quan++;
   }
 
-  if (quan >= weightedList.length) {
+  if (quan >= allBlocks.length) {
     world.say(i18n.t('game.all_blocks_destroyed'));
   }
 }
@@ -271,7 +271,6 @@ function explodePlayer(position, isGhostExplosion = false) {
       // 如果是幽灵爆炸，有概率将伤害转为少量治疗
       if (isGhostExplosion && Math.random() < 0.5) {
         // 50%概率治疗
-        // 治疗量为伤害量的1/3
         const healAmount = Math.max(1, Math.floor(damageAmount));
         // 直接增加玩家的hp属性 💕
         if (k.hp !== undefined) {
@@ -295,7 +294,9 @@ function explodePlayer(position, isGhostExplosion = false) {
         // 正常造成伤害，但检查无敌状态
         if (!k.isInvincible) {
           k.hurt(damageAmount, {
-            damageType: i18n.t('damage.tnt_explosion'),
+            damageType: isGhostExplosion
+              ? i18n.t('damage.ghost_explosion')
+              : i18n.t('damage.tnt_explosion'),
           });
         }
       }
@@ -473,6 +474,38 @@ async function summonGhostEffect(entity, count = null) {
   entity.player.directMessage(i18n.t('skill.magic_hat.summon_ghost'));
 }
 
+// 魔术帽子效果 🎩✨
+async function magicHatEffect(entity, duration = 5000) {
+  // 创建魔术帽子可穿戴物品 - 加大尺寸版本
+  const magicHat = entity.player.addWearable({
+    bodyPart: GameBodyPart.HEAD,
+    mesh: 'mesh/魔术帽.vb',
+    metalness: 0.3, // 金属质感
+    shininess: 0.3, // 高光泽度
+    orientation: new GameQuaternion(0, 0, 0, 1), // 默认朝向
+    scale: new GameVector3(2, 2, 2), // 加大帽子尺寸，更明显的魔术帽效果
+    offset: new GameVector3(0, 1.5, 0), // 向上偏移，确保帽子位置合适
+  });
+
+  // 添加魔法粒子效果
+  Object.assign(entity, {
+    particleRate: 40,
+    particleColor: new GameRGBColor(0.8, 0.2, 1.0),
+    particleLifetime: 0.6,
+    particleSize: [2, 1.5, 1, 0.5],
+  });
+  // 设置定时器移除魔术帽子 - 移除消除提示
+  setTimeout(() => {
+    if (magicHat) {
+      magicHat.remove(); // 移除魔术帽子
+    }
+    Object.assign(entity, { particleRate: 0 }); // 移除粒子效果
+    // 移除了帽子消除的提示消息
+  }, duration);
+
+  return magicHat;
+}
+
 // 综合技能效果函数 - 可以被其他技能调用 ✨
 // 使用方法：
 // await applySkillEffect(entity, 'heal', { amount: 70 });
@@ -483,6 +516,7 @@ async function summonGhostEffect(entity, count = null) {
 // await applySkillEffect(entity, 'bats', { count: 3 });
 // await applySkillEffect(entity, 'candy', { count: 2 });
 // await applySkillEffect(entity, 'ghost', { count: 1 });
+// await applySkillEffect(entity, 'magic_hat', { duration: 5000 });
 async function applySkillEffect(entity, effectType, options = {}) {
   switch (effectType) {
     case 'heal':
@@ -501,6 +535,8 @@ async function applySkillEffect(entity, effectType, options = {}) {
       return await summonCandyEffect(entity, options.count);
     case 'ghost':
       return await summonGhostEffect(entity, options.count);
+    case 'magic_hat':
+      return await magicHatEffect(entity, options.duration || 5000);
     default:
       console.warn(`Unknown skill effect: ${effectType}`);
   }
@@ -645,32 +681,23 @@ async function summonTNT() {
     gravity: true,
   });
   tnt.addTag('TNT');
-  // 增强位置生成随机性：扩大范围的随机位置 + 带偏移的玩家位置
-  const positions = [];
+  // 🎆 确保TNT在圆台内随机生成
+  // 圆台中心：(65, 65)，半径：50格（最外层平台）
+  const centerX = 65;
+  const centerZ = 65;
+  const maxRadius = 50; // 最大半径，确保在最外层平台内
 
-  // 添加20个范围更大、y坐标也随机的位置
-  for (let i = 0; i < 20; i++) {
-    positions.push({
-      x: 20 + Math.random() * 90, // 扩大x范围到20-110
-      y: 80 + Math.random() * 60, // y范围随机化到80-140
-      z: 20 + Math.random() * 90, // 扩大z范围到20-110
-    });
-  }
+  // 在圆台范围内随机生成极坐标
+  const randomRadius = Math.random() * maxRadius; // 0-50的随机半径
+  const randomAngle = Math.random() * 2 * Math.PI; // 0-2π的随机角度
 
-  // 添加带随机偏移的玩家位置（如果有玩家在游戏中）
-  for (const player of world.querySelectorAll('player')) {
-    if (PlayerInGame.includes(player.player.name)) {
-      // 为玩家位置添加±15的随机偏移，避免总是精确落在玩家位置
-      positions.push({
-        x: player.position.x + (Math.random() * 30 - 15),
-        y: 100 + Math.random() * 40, // y坐标也随机化
-        z: player.position.z + (Math.random() * 30 - 15),
-      });
-    }
-  }
+  // 转换为笛卡尔坐标
+  const randomX = centerX + randomRadius * Math.cos(randomAngle);
+  const randomZ = centerZ + randomRadius * Math.sin(randomAngle);
+  const randomY = 60 + Math.random() * 80; // Y坐标保持随机
 
-  // 随机选择一个位置
-  tnt.position.copy(positions[Math.floor(Math.random() * positions.length)]);
+  // 确保在圆台内生成
+  tnt.position.set(randomX, randomY, randomZ);
 
   // 简化闪烁效果
   tnt.int = setInterval(() => {
@@ -1147,6 +1174,9 @@ var skillList = [
       // 技能激活消息
       entity.player.directMessage(i18n.t('skill.magic_hat.activated'));
 
+      // 添加魔术帽子效果 🎩✨
+      await applySkillEffect(entity, 'magic_hat', { duration: 8000 });
+
       // 添加视觉效果 - 参考其他技能的实现方式
       Object.assign(entity, {
         particleRate: 50,
@@ -1318,11 +1348,11 @@ world.onPress(async ({ button, entity, raycast }) => {
         content: i18n.t('gui.join_game_content'),
         options: [
           i18n.t('gui.join_game_now'),
+          i18n.t('gui.quick_solo_game'),
           i18n.t('gui.view_game_rules'),
           i18n.t('gui.cancel'),
         ],
       });
-
       // 处理菜单选择
       if (mainMenuOption) {
         // 立即加入游戏
@@ -1392,8 +1422,30 @@ world.onPress(async ({ button, entity, raycast }) => {
             entity.player.directMessage(i18n.t('game.already_joined'));
           }
         }
-        // 查看游戏规则
+        // 快速开始单人游戏
         else if (mainMenuOption.index === 1) {
+          // 检查是否已加入游戏
+          if (!PlayerInGame.includes(entity.player.name)) {
+            PlayerInGame.push(entity.player.name);
+            // 只给自己发送消息，不再广播
+            entity.player.directMessage(i18n.t('game.join_success'));
+
+            // 强制设置为单人游戏模式
+            isSinglePlayer = true;
+            world.say(i18n.t('gui.quick_solo_game_content'));
+
+            // 单人模式立即开始游戏，无倒计时
+            if (!worldInGame) {
+              world.say(i18n.t('game.game_started'));
+              startGame();
+            }
+          } else {
+            // 已加入游戏，提示用户
+            entity.player.directMessage(i18n.t('game.already_joined'));
+          }
+        }
+        // 查看游戏规则
+        else if (mainMenuOption.index === 2) {
           await entity.player.dialog({
             type: 'select',
             title: i18n.t('gui.game_guide_title'),
@@ -1402,7 +1454,7 @@ world.onPress(async ({ button, entity, raycast }) => {
           });
         }
         // 取消操作，不需要处理
-        else if (mainMenuOption.index === 2) {
+        else if (mainMenuOption.index === 3) {
           // 什么都不做
         }
       }
@@ -2157,17 +2209,16 @@ async function startGame() {
     }
 
     // 单人游戏4分钟胜利 ⏰
-    if (isSinglePlayer && worldTime >= 240) {
+    if (isSinglePlayer && Date.now() - gameStartTime >= 240000) {
       isVictory = true;
       break;
     }
 
     // 多人游戏6分钟群体胜利 ⏰
-    if (!isSinglePlayer && worldTime >= 360) {
+    if (!isSinglePlayer && Date.now() - gameStartTime >= 360000) {
       isVictory = true;
       break;
     }
-
     // 每15秒增加难度
     if (worldTime % 15 === 0 && worldTime > 0) {
       // 每30秒增加一次方块破碎数量
