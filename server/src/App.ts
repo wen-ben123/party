@@ -144,7 +144,7 @@ async function changeBlock(x, y, z) {
   voxels.setVoxel(x, y, z, 'air');
 }
 
-// 越上面，消失方块越多的功能
+// 方块随机消失功能（已移除高度权重）🎲
 async function randoestroyVoxels(num) {
   world.say(i18n.t('block_cracking'));
   var quan = 0;
@@ -166,28 +166,18 @@ async function randoestroyVoxels(num) {
       }
     }
   }
-  // 2. 计算各层级的权重 - 越高权重越大（越容易被选中）
-  var weightedList = [];
-  var maxY = Math.max(...levels);
+  // 2. 随机选择方块进行碎裂（移除高度权重，完全随机）🎲
+  var allBlocks = [];
 
+  // 收集所有方块到统一列表
   for (var level in levelList) {
-    var y = parseInt(level);
-    // 计算权重：越高的层，权重越大
-    var weight = (y / maxY) * 3 + 0.1; // 最小0.1，最大3.1
-
-    // 按权重将方块添加到加权列表
-    for (var i = 0; i < levelList[level].length; i++) {
-      for (var j = 0; j < weight * 5; j++) {
-        // 乘以系数5来增强效果
-        weightedList.push(levelList[level][i]);
-      }
-    }
+    allBlocks = allBlocks.concat(levelList[level]);
   }
 
-  // 3. 从加权列表中随机选择方块进行碎裂
-  while (quan < Math.min(num, weightedList.length)) {
-    var randomIndex = Math.floor(Math.random() * weightedList.length);
-    var pos = weightedList[randomIndex];
+  // 3. 完全随机选择方块进行碎裂
+  while (quan < Math.min(num, allBlocks.length)) {
+    var randomIndex = Math.floor(Math.random() * allBlocks.length);
+    var pos = allBlocks[randomIndex];
 
     // 触发碎裂动画
     changeBlock(pos.x, pos.y, pos.z);
@@ -317,6 +307,202 @@ function explodePlayer(position, isGhostExplosion = false) {
       k.velocity.z = (direction.z * speed) / dist;
       k.velocity.y += 1.25;
     }
+  }
+
+  // 蝙蝠和幽灵互相影响机制 🦇👻
+  // 1. 爆炸会影响蝙蝠（蝙蝠会被炸死）
+  for (const bat of activeBats) {
+    if (bat && !bat.destroyed && bat.position.distance(position) <= 8) {
+      // 蝙蝠被爆炸炸死
+      const damageAmount = Math.round(15 / bat.position.distance(position));
+
+      // 添加爆炸视觉效果
+      Object.assign(bat, {
+        particleRate: 150,
+        particleColor: new GameRGBColor(1, 0.5, 0),
+        particleLifetime: 0.5,
+        particleSize: [6, 4, 2, 1],
+      });
+
+      // 延迟销毁蝙蝠，让玩家看到效果
+      setTimeout(() => {
+        if (bat && !bat.destroyed) {
+          // 清除相关定时器
+          if (bat.movementTimer) clearInterval(bat.movementTimer);
+          if (bat.lifespanTimer) clearTimeout(bat.lifespanTimer);
+          bat.destroy();
+
+          // 从活跃列表中移除
+          const batIndex = activeBats.indexOf(bat);
+          if (batIndex > -1) {
+            activeBats.splice(batIndex, 1);
+          }
+        }
+      }, 300);
+
+      break; // 避免重复处理
+    }
+  }
+
+  // 2. 爆炸会影响幽灵（幽灵会被加速爆炸）
+  for (const ghost of activeGhosts) {
+    if (ghost && !ghost.destroyed && ghost.position.distance(position) <= 8) {
+      // 幽灵被爆炸加速引爆
+      const ghostIndex = activeGhosts.indexOf(ghost);
+      if (ghostIndex > -1) {
+        // 立即触发幽灵的加速爆炸
+        setTimeout(async () => {
+          if (ghost && !ghost.destroyed) {
+            await explodeGhost(ghost, true); // true表示加速爆炸
+          }
+        }, 100);
+      }
+
+      break; // 避免重复处理
+    }
+  }
+}
+
+// ========== 技能效果函数封装 ==========
+
+// 治疗技能效果 💚
+async function healEffect(entity, amount = 70) {
+  entity.hp += amount;
+  if (entity.hp > entity.maxHp) {
+    entity.hp = entity.maxHp;
+  }
+  entity.player.directMessage(i18n.t('skill.magic_hat.heal', { amount }));
+}
+
+// 伤害技能效果 💥
+async function damageEffect(entity, amount = 30) {
+  if (entity.hurt && !entity.isInvincible) {
+    entity.hurt(amount, { damageType: i18n.t('damage.magic') });
+    entity.player.directMessage(i18n.t('skill.magic_hat.damage', { amount }));
+  }
+}
+
+// 护盾技能效果 🛡️
+async function shieldEffect(entity, duration = 1500) {
+  entity.isInvincible = true;
+  entity.player.directMessage(i18n.t('skill.magic_hat.shield_start'));
+
+  // 添加视觉效果
+  Object.assign(entity, {
+    particleRate: 30,
+    particleColor: new GameRGBColor(0, 0.8, 1),
+    particleLifetime: 0.4,
+    particleSize: [3, 2, 1, 0.5],
+  });
+
+  setTimeout(() => {
+    entity.isInvincible = false;
+    entity.player.directMessage(i18n.t('skill.magic_hat.shield_end'));
+    Object.assign(entity, { particleRate: 0 });
+  }, duration);
+}
+
+// 速度提升效果 💨
+async function speedEffect(entity, duration = 3000) {
+  const originalSpeed = entity.player.runSpeed;
+  entity.player.runSpeed += 0.3;
+  entity.player.walkSpeed = entity.player.runSpeed;
+  entity.player.directMessage(i18n.t('skill.magic_hat.speed_start'));
+
+  // 添加视觉效果
+  Object.assign(entity, {
+    particleRate: 80,
+    particleColor: new GameRGBColor(1, 1, 0.5),
+    particleLifetime: 0.3,
+    particleSize: [4, 3, 2, 1],
+  });
+
+  setTimeout(() => {
+    entity.player.runSpeed = originalSpeed;
+    entity.player.walkSpeed = originalSpeed;
+    entity.player.directMessage(i18n.t('skill.magic_hat.speed_end'));
+    Object.assign(entity, { particleRate: 0 });
+  }, duration);
+}
+
+// 传送效果 ✨
+async function teleportEffect(entity) {
+  const newX = 30 + Math.random() * 70;
+  const newZ = 30 + Math.random() * 70;
+  const newY = 25 + Math.random() * 20;
+  entity.position = new GameVector3(newX, newY, newZ);
+  entity.player.directMessage(i18n.t('skill.magic_hat.teleport'));
+
+  // 传送视觉效果
+  Object.assign(entity, {
+    particleRate: 100,
+    particleColor: new GameRGBColor(0.8, 0.2, 1.0),
+    particleLifetime: 0.8,
+    particleSize: [6, 4, 2, 1],
+  });
+
+  setTimeout(() => {
+    Object.assign(entity, { particleRate: 0 });
+  }, 1000);
+}
+
+// 召唤蝙蝠效果 🦇
+async function summonBatsEffect(entity, count = null) {
+  const batCount = count || 2 + Math.floor(Math.random() * 3);
+  summonBat(batCount);
+  entity.player.directMessage(
+    i18n.t('skill.magic_hat.summon_bats', { count: batCount })
+  );
+}
+
+// 召唤糖果效果 🍬
+async function summonCandyEffect(entity, count = null) {
+  const candyCount = count || 1 + Math.floor(Math.random() * 2);
+  for (let i = 0; i < candyCount; i++) {
+    setTimeout(() => summonCandy(), i * 300);
+  }
+  entity.player.directMessage(
+    i18n.t('skill.magic_hat.candy_rain', { count: candyCount })
+  );
+}
+
+// 召唤幽灵效果 👻
+async function summonGhostEffect(entity, count = null) {
+  const ghostCount = count || 1;
+  summonGhost(ghostCount);
+  entity.player.directMessage(i18n.t('skill.magic_hat.summon_ghost'));
+}
+
+// 综合技能效果函数 - 可以被其他技能调用 ✨
+// 使用方法：
+// await applySkillEffect(entity, 'heal', { amount: 70 });
+// await applySkillEffect(entity, 'damage', { amount: 30 });
+// await applySkillEffect(entity, 'shield', { duration: 1500 });
+// await applySkillEffect(entity, 'speed', { duration: 3000 });
+// await applySkillEffect(entity, 'teleport');
+// await applySkillEffect(entity, 'bats', { count: 3 });
+// await applySkillEffect(entity, 'candy', { count: 2 });
+// await applySkillEffect(entity, 'ghost', { count: 1 });
+async function applySkillEffect(entity, effectType, options = {}) {
+  switch (effectType) {
+    case 'heal':
+      return await healEffect(entity, options.amount || 70);
+    case 'damage':
+      return await damageEffect(entity, options.amount || 30);
+    case 'shield':
+      return await shieldEffect(entity, options.duration || 1500);
+    case 'speed':
+      return await speedEffect(entity, options.duration || 3000);
+    case 'teleport':
+      return await teleportEffect(entity);
+    case 'bats':
+      return await summonBatsEffect(entity, options.count);
+    case 'candy':
+      return await summonCandyEffect(entity, options.count);
+    case 'ghost':
+      return await summonGhostEffect(entity, options.count);
+    default:
+      console.warn(`Unknown skill effect: ${effectType}`);
   }
 }
 
@@ -568,39 +754,6 @@ world.onPlayerLeave(async ({ entity }) => {
 
 var skillList = [
   {
-    name: i18n.t('skill.shield_block.name'),
-    introduce: i18n.t('skill.shield_block.introduce'),
-    notice: i18n.t('skill.shield_block.notice'),
-    cold: 25000,
-    async effect(entity, raycast) {
-      // 开启无敌效果 🛡️✨
-      entity.isInvincible = true;
-
-      // 添加视觉效果
-      Object.assign(entity, {
-        particleRate: 50,
-        particleColor: new GameRGBColor(0, 0.8, 1),
-        particleLifetime: 0.5,
-        particleSize: [4, 3, 2, 1, 0.5],
-      });
-
-      // 通知玩家
-      entity.player.directMessage(i18n.t('skill.shield_block.activated'));
-
-      // 3秒后移除无敌效果
-      await sleep(3000);
-
-      // 关闭无敌效果
-      entity.isInvincible = false;
-
-      // 移除视觉效果
-      Object.assign(entity, { particleRate: 0 });
-
-      // 通知玩家效果结束
-      entity.player.directMessage(i18n.t('skill.shield_block.deactivated'));
-    },
-  },
-  {
     name: i18n.t('skill.old_shoes.name'),
     introduce: i18n.t('skill.old_shoes.introduce'),
     notice: i18n.t('skill.old_shoes.notice'),
@@ -658,10 +811,8 @@ var skillList = [
     notice: i18n.t('skill.heal.notice'),
     cold: 30000,
     async effect(entity, raycast) {
-      entity.hp += 70;
-      if (entity.hp > entity.maxHp) {
-        entity.hp = entity.maxHp;
-      }
+      // 使用综合效果函数
+      await applySkillEffect(entity, 'heal', { amount: 70 });
     },
   },
   {
@@ -695,19 +846,8 @@ var skillList = [
     notice: i18n.t('skill.chorus_fruit.notice'),
     cold: 35000,
     async effect(entity, raycast) {
-      var list = [];
-      for (let i = 35; i < 85; i++) {
-        for (let y = 0; y < 60; y++) {
-          for (let q = 35; q < 85; q++) {
-            var voxelName = voxels.name(voxels.getVoxelId(i, y, q));
-            if (voxelName !== 'air') {
-              list.push({ x: i, y: y, z: q });
-            }
-          }
-        }
-      }
-      entity.position.copy(list[Math.floor(Math.random() * list.length)]);
-      entity.position.y += 2;
+      // 使用封装的传送效果函数
+      await applySkillEffect(entity, 'teleport');
     },
   },
   {
@@ -998,6 +1138,104 @@ var skillList = [
       // 移除移动恢复提示 🌟
     },
   },
+  {
+    name: i18n.t('skill.magic_hat.name'),
+    introduce: i18n.t('skill.magic_hat.introduce'),
+    notice: i18n.t('skill.magic_hat.notice'),
+    cold: 10000,
+    async effect(entity, raycast) {
+      // 技能激活消息
+      entity.player.directMessage(i18n.t('skill.magic_hat.activated'));
+
+      // 添加视觉效果 - 参考其他技能的实现方式
+      Object.assign(entity, {
+        particleRate: 50,
+        particleColor: new GameRGBColor(0.8, 0.2, 1.0),
+        particleLifetime: 0.5,
+        particleSize: [3, 2, 1, 0.5, 0.2],
+      });
+
+      // 随机选择效果
+      const effects = [
+        'heal',
+        'damage',
+        'bats',
+        'teleport',
+        'candy',
+        'ghost',
+        'shield',
+        'speed',
+      ];
+
+      const selectedEffect =
+        effects[Math.floor(Math.random() * effects.length)];
+
+      // 执行随机效果
+      switch (selectedEffect) {
+        case 'heal':
+          // 使用综合效果函数
+          const healAmount = 30 + Math.random() * 20;
+          await applySkillEffect(entity, 'heal', {
+            amount: Math.floor(healAmount),
+          });
+          break;
+
+        case 'damage':
+          // 使用综合效果函数
+          const damageAmount = 15 + Math.random() * 10;
+          await applySkillEffect(entity, 'damage', {
+            amount: Math.floor(damageAmount),
+          });
+          break;
+
+        case 'bats':
+          // 使用综合效果函数
+          await applySkillEffect(entity, 'bats');
+          break;
+
+        case 'teleport':
+          // 使用综合效果函数
+          await applySkillEffect(entity, 'teleport');
+          break;
+
+        case 'candy':
+          // 使用综合效果函数
+          await applySkillEffect(entity, 'candy');
+          break;
+
+        case 'ghost':
+          // 使用综合效果函数
+          await applySkillEffect(entity, 'ghost');
+          break;
+
+        case 'shield':
+          // 使用综合效果函数
+          await applySkillEffect(entity, 'shield', { duration: 1500 });
+          break;
+
+        case 'speed':
+          // 使用综合效果函数
+          await applySkillEffect(entity, 'speed', { duration: 3000 });
+          break;
+      }
+
+      // 移除视觉效果
+      await sleep(1000);
+      Object.assign(entity, { particleRate: 0 });
+
+      entity.player.directMessage(i18n.t('skill.magic_hat.completed'));
+    },
+  },
+  {
+    name: i18n.t('skill.shield_block.name'),
+    introduce: i18n.t('skill.shield_block.introduce'),
+    notice: i18n.t('skill.shield_block.notice'),
+    cold: 25000,
+    async effect(entity, raycast) {
+      // 使用综合效果函数创建护盾效果
+      await applySkillEffect(entity, 'shield', { duration: 2000 });
+    },
+  },
 ];
 
 //获取技能信息
@@ -1232,11 +1470,11 @@ function summonGhost(count = 1) {
         fixed: false,
         collides: true,
         gravity: true, // 给幽灵添加重力 👻
-        position: {
-          x: 30 + Math.random() * 70,
-          y: 25 + Math.random() * 30, // 适当提高生成高度，考虑重力影响
-          z: 30 + Math.random() * 70,
-        },
+        position: new GameVector3(
+          30 + Math.random() * 70,
+          25 + Math.random() * 30,
+          30 + Math.random() * 70
+        ),
       });
       ghost.addTag('ghost');
       ghost.isGhost = true;
@@ -1411,8 +1649,8 @@ async function explodeGhost(ghost, accelerated = false) {
       particleSize: [8, 6, 4, 2, 1],
     });
 
-    // 如果是加速爆炸，减少延迟时间
-    let delay = accelerated ? 200 : 500;
+    // 如果是加速爆炸，减少延迟时间（但保持明显差异）
+    let delay = accelerated ? 100 : 800;
     // 确保延迟时间不为负数 🌟
     delay = Math.max(0, delay);
     await sleep(delay);
@@ -1444,11 +1682,11 @@ function summonBat(count = 1) {
         fixed: false,
         collides: true,
         gravity: false,
-        position: {
-          x: 60 + (Math.random() - 0.5) * 40,
-          y: 50 + Math.random() * 10,
-          z: 60 + (Math.random() - 0.5) * 40,
-        },
+        position: new GameVector3(
+          60 + (Math.random() - 0.5) * 40,
+          50 + Math.random() * 10,
+          60 + (Math.random() - 0.5) * 40
+        ),
       });
       bat.addTag('bat');
       bat.isBat = true;
@@ -1836,7 +2074,7 @@ async function startGame() {
 
   // 游戏开始
   await reset();
-  worldCold = 15; // 初始TNT生成间隔（秒）- 下调初始频率
+  worldCold = 10; // 初始TNT生成间隔（秒）- 增加TNT频率 🧨
   worldNum = 10; // 初始方块的破碎数量
   worldTime = 0;
   worldInGame = true;
@@ -1844,7 +2082,11 @@ async function startGame() {
   world.querySelectorAll('player').forEach((e) => {
     e.player.cancelDialogs();
     if (PlayerInGame.includes(e.player.name)) {
-      e.position.set(45 + Math.random() * 35, 52.5, 45 + Math.random() * 35);
+      e.position = new GameVector3(
+        45 + Math.random() * 35,
+        52.5,
+        45 + Math.random() * 35
+      );
       resetPlayer(e);
     }
   });
@@ -1914,8 +2156,15 @@ async function startGame() {
       break;
     }
 
-    // 如果是单人游戏且达到5分钟，结束游戏
-    if (isSinglePlayer && worldTime >= 300) {
+    // 单人游戏4分钟胜利 ⏰
+    if (isSinglePlayer && worldTime >= 240) {
+      isVictory = true;
+      break;
+    }
+
+    // 多人游戏6分钟群体胜利 ⏰
+    if (!isSinglePlayer && worldTime >= 360) {
+      isVictory = true;
       break;
     }
 
@@ -1927,9 +2176,9 @@ async function startGame() {
         randoestroyVoxels(worldNum);
       }
 
-      // 每15秒减少2秒TNT生成间隔（频率加快）
+      // 每15秒减少3秒TNT生成间隔（频率加快）🚀
       const oldWorldCold = worldCold;
-      worldCold = Math.max(3, worldCold - 2); // 最低保持3秒间隔
+      worldCold = Math.max(3, worldCold - 3); // 最低保持3秒间隔，每次减少3秒 🚀
 
       // 如果间隔改变了，更新TNT定时器
       if (oldWorldCold !== worldCold && gameInterval) {
@@ -1998,8 +2247,7 @@ async function startGame() {
     world.say(i18n.t('game.game_over_all_dead'));
   } else {
     if (isSinglePlayer) {
-      if (worldTime >= 300) {
-        isVictory = true;
+      if (isVictory) {
         world.say(
           i18n.t('game.single_player_victory', { player: PlayerInGame[0] })
         );
@@ -2015,11 +2263,12 @@ async function startGame() {
         );
       }
     } else {
-      // 多人游戏特殊处理：只剩一人时明确提示胜利
-      if (PlayerInGame.length === 1) {
-        isVictory = true;
+      // 多人游戏特殊处理：6分钟群体胜利 🎉
+      if (isVictory) {
         world.say(
-          i18n.t('game.multi_player_victory', { player: PlayerInGame[0] })
+          i18n.t('game.multi_player_victory', {
+            players: PlayerInGame.join(', '),
+          })
         );
       } else {
         world.say(
@@ -2310,11 +2559,11 @@ function summonCandy() {
       fixed: false, // 允许移动
       collides: false, // 初始状态下没有碰撞体积 🍬
       gravity: true, // 启用重力，让糖果可以正常掉落
-      position: { x, y, z },
+      position: new GameVector3(x, y, z),
     });
 
-    // 随机时间后恢复碰撞体积（0-2秒内随机）🎯
-    const enableCollideTime = Math.random() * 2000; // 0-2秒随机
+    // 随机时间后恢复碰撞体积（0-5秒内随机）🎯
+    const enableCollideTime = Math.random() * 5000; // 0-5秒随机
     setTimeout(() => {
       try {
         if (candy && !candy.destroyed) {
@@ -2493,7 +2742,7 @@ async function handleCandyInteraction(player, candy) {
                 meshScale: [0.1, 0.1, 0.1],
                 fixed: true,
                 collides: false,
-                position: { x: x, y: repairY + 0.5, z: z },
+                position: new GameVector3(x, repairY + 0.5, z),
               });
               Object.assign(repairEffect, {
                 particleRate: 50,

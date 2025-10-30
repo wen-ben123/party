@@ -35,7 +35,8 @@
     "heal_broadcast": "💫{{playerName}} was spiritually healed, received {{amount}} healing!",
     "candy_heal_broadcast": "🍬{{playerName}} used candy to restore health!",
     "skill_rescue_platform_triggered": "🛟Rescue Platform activated! But cost 30 health points!💔",
-    "health_info": "❤️Current Health: {{current}}"
+    "health_info": "❤️Current Health: {{current}}",
+    "magic": "Magic Damage✨"
   },
   "gui": {
     "skill": "🧙‍♂️Skill",
@@ -119,9 +120,9 @@
     "minutes_passed": "⏱️This round has been going for {{minutes}} minutes!📈",
     "blocks_remaining_end": "🧱Remaining blocks ≤50, game over!💀",
     "game_over_all_dead": "💀Game over! All souls have become spirits! Halloween night wins!👻",
-    "single_player_victory": "🏆{{player}} survived 5 minutes in Halloween night! You are a true survival master!🎉",
+    "single_player_victory": "🏆{{player}} survived 4 minutes in Halloween night! You are a true survival master!🎉",
     "single_player_end": "👤Single player mode over! {{player}} survived {{minutes}}m {{seconds}}s in the terrifying Halloween night!🎃",
-    "multi_player_victory": "👑Congratulations {{player}} for becoming the Halloween King! You defeated all demons and monsters!🔥",
+    "multi_player_victory": "👑Congratulations {{players}} for becoming the Halloween Kings! You defeated all demons and monsters!🔥",
     "multi_player_end": "🎉Halloween party ended! Congratulations to the brave survivors: {{players}}! You conquered fear!👻",
 
     "player_left_with_remaining": "👤{{player}} got scared away! {{count}} remaining players🔢",
@@ -155,17 +156,7 @@
   "skill_cooldown": "⏳Skill cooling down, {{time}} seconds remaining!🔥",
   "skill_used": "🎮You used {{skill}} skill!✨",
   "game_start_countdown": "⏱️Game starts in {{countdown}} seconds! Current participants: {{count}} players{{mode}}👤",
-  "game_start": "🎮Game starts! Good luck everyone!🚀",
   "game_status": "⏱️Game Time: {{minutes}}m {{seconds}}s | Remaining: {{players}} players | Blocks: {{blocks}} | [{{skill}}] {{status}}🎮",
-  "single_player_confirmed": "✅Single Player Mode Confirmed!👤",
-  "multi_player_confirmed": "✅Multiplayer Mode Confirmed!👥",
-  "single_player_start": "🎮Single Player Game Start!👤",
-  "multi_player_start": "🎮Multiplayer Game Start!👥",
-  "bat_summoned": "🦇Summoned {{count}} bats!🔮",
-  "damage_fell_void": "💥Blown into void by TNT🌌",
-  "tag": {
-    "about_to_explode": "💥About to explode⏳"
-  },
 
   "error": {
     "unsupported_element_type": "❌Unsupported element type: {{type}}🔧"
@@ -249,16 +240,30 @@
       "deactivated": "💫Magic Shield effect ended💨"
     },
     "repairman": {
-      "name": "🔧Repairman",
-      "introduce": "🔧Create a platform with radius 2 at your feet!",
-      "notice": "⚠️You will be immobilized for 3 seconds, but can quickly repair terrain!",
-      "platform_created": "🔧Repair complete! Platform created!",
-      "movement_restored": "✅Movement restored!",
-      "joystick_hidden": "✨Virtual joystick hidden, repairing in place...✨",
-      "joystick_restored": "✨Virtual joystick restored, keep moving!✨",
-      "health_deducted": "💔Repair cost 10 health points!",
-      "low_health": "❤️‍🩹Insufficient health, cannot use Repairman skill!",
-      "cooldown_increased": "⏱️Repairman skill cooldown increased!"
+      "name": "🔧Repairman🛠️",
+      "introduce": "⏱️25s cooldown, creates temporary platform under feet, costs 10 HP and adds 5s cooldown per use🩸",
+      "notice": "⚠️Cannot use when HP < 10, adds 5s cooldown each use",
+      "platform_created": "🛠️Platform created!",
+      "health_deducted": "🩸Health deducted {{amount}} points",
+      "low_health": "⚠️Insufficient health, cannot use!",
+      "cooldown_increased": "⏰Cooldown increased {{amount}} seconds"
+    },
+    "magic_hat": {
+      "name": "🎩Phantom Magician's Trick Hat✨",
+      "introduce": "⏱️10s cooldown, randomly performs 8 magical tricks: heal, damage, summon, teleport, candy rain, ghost helper, shield, speed🎲",
+      "notice": "🎭Each use triggers different effects, full of surprises like a real magic show!",
+      "activated": "✨Magic effect activated, preparing random tricks...",
+      "heal": "🌟Magical healing! Restored {{amount}} HP💚",
+      "damage": "💥Magic explosion! Dealt {{amount}} damage💔",
+      "summon_bats": "🦇Bat trick! Summoned {{count}} bat helpers",
+      "teleport": "✨Teleportation! You've been moved to a mysterious location",
+      "candy_rain": "🍬Candy magic! Summoned {{count}} magical candies",
+      "summon_ghost": "👻Ghost helper! Summoned friendly ghost to fight for you",
+      "shield_start": "🛡️Magic shield activated! Immune to damage for 1.5 seconds",
+      "shield_end": "✨Shield disappeared, magic effect ended",
+      "speed_start": "💨Magic acceleration! Movement speed increased for 3 seconds",
+      "speed_end": "🎭Speed boost ended, returned to normal speed",
+      "completed": "✨Magic effect ended, trick performance completed..."
     }
   },
   "skill.default": "🔄Default Skill🎮",
