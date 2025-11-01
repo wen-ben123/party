@@ -120,6 +120,7 @@
     "single": "👤Single",
     "multi": "👥Multi",
     "summon_bats": "🦇Summoned {{count}} bats!🔮",
+    "multiple_tnt_summoned": "🧨Summoned {{count}} TNTs at once! Watch out for explosions!💥",
     "minutes_passed": "⏱️This round has been going for {{minutes}} minutes!📈",
     "blocks_remaining_end": "🧱Remaining blocks ≤50, game over!💀",
     "game_over_all_dead": "💀Game over! All souls have become spirits! Halloween night wins!👻",
@@ -135,6 +136,8 @@
     "player_ghost_remaining": "💀{{player}} was {{damageType}}, became a real spirit! {{remaining}} living souls remaining!🔢",
     "halloween_music": "🎶Halloween music has started playing... Get ready for spirits!👻",
     "bat_hit": "🦇You were hit by a bat and took damage!💥",
+    "bat_killed": "🦇You successfully killed a bat!✨",
+    "ghost_killed": "👻You successfully eliminated a ghost!✨",
     "join_success": "✅Successfully joined the game!🎮",
     "all_blocks_destroyed": "💥All blocks have been destroyed!🧱",
     "decoy_created": "🎭Cute decoy successfully summoned!✨",
@@ -267,6 +270,28 @@
       "speed_start": "💨Magic acceleration! Movement speed increased for 3 seconds",
       "speed_end": "🎭Speed boost ended, returned to normal speed",
       "completed": "✨Magic effect ended, trick performance completed..."
+    },
+    "transformation": {
+      "name": "🦇Transformation✨",
+      "introduce": "Randomly transform into bat or ghost form, gain special abilities for 8 seconds",
+      "notice": "Bat form grants flight and speed boost, ghost form grants flight and intangibility (but still takes damage)",
+      "activated": "✨Transformation activated! Preparing random transformation...",
+      "bat_form": "🦇Transformed into bat form! Flight enhanced, speed greatly boosted, can become invisible and phase through walls!",
+      "ghost_form": "👻Transformed into ghost form! Flight and intangibility activated!",
+      "bat_effect_end": "🦇Bat form ended, returned to normal",
+      "ghost_effect_end": "👻Ghost form ended, returned to normal",
+      "completed": "✨Transformation ended, returned to human form..."
+    },
+    "shotgun": {
+      "name": "🔫Shotgun🎯",
+      "introduce": "🔫Cause an explosion at crosshair location, dealing 2 damage to hit entities!",
+      "notice": "🎯Aim at enemies and shoot, explosion effect shakes the battlefield!",
+      "activated": "🔫Shotgun fired!💥",
+      "hit_entity": "🎯Hit enemy for {{damage}} damage!",
+      "no_hit": "❌No target hit!",
+      "hit_by_shotgun": "💥You were hit by {{player}}'s shotgun!",
+      "shot_fired": "🔫Shotgun has been fired!",
+      "missed": "❌Shotgun shot missed the target!"
     }
   },
   "skill.default": "🔄Default Skill🎮",

@@ -120,6 +120,7 @@
     "single": "👤单人",
     "multi": "👥多人",
     "summon_bats": "🦇召唤{{count}}只蝙蝠！🔮",
+    "multiple_tnt_summoned": "🧨一次性生成了{{count}}个TNT！小心爆炸！💥",
     "minutes_passed": "⏱️本轮游戏已经进行了{{minutes}}分钟！📈",
     "blocks_remaining_end": "🧱剩余方块≤50，游戏结束！💀",
     "game_over_all_dead": "💀游戏结束！所有灵魂都变成了怨灵！万圣节之夜胜利了！👻",
@@ -135,6 +136,8 @@
     "player_ghost_remaining": "💀{{player}}{{damageType}}，变成了真正的怨灵！还有{{remaining}}个活着的灵魂！🔢",
     "halloween_music": "🎶万圣节音乐已经开始播放...准备好迎接怨灵！👻",
     "bat_hit": "🦇你被蝙蝠击中并受到伤害！💥",
+    "bat_killed": "🦇你成功击杀了一只蝙蝠！✨",
+    "ghost_killed": "👻你成功消灭了一个幽灵！✨",
     "join_success": "✅成功加入游戏！🎮",
     "all_blocks_destroyed": "💥所有方块都被摧毁了！🧱"
   },
@@ -263,6 +266,29 @@
       "speed_start": "💨魔法加速！3秒内移动速度提升",
       "speed_end": "🎭加速效果结束，恢复正常速度",
       "completed": "✨魔法效果结束，戏法表演完成..."
+    },
+    "transformation": {
+      "name": "🦇变身术✨",
+      "introduce": "⏱️随机变成蝙蝠或幽灵，获得特殊能力持续8秒🎭",
+      "notice": "🎲变身为蝙蝠可飞行和速度提升，变身为幽灵可飞行和穿墙（但会受到伤害）！",
+      "activated": "✨变身术激活！准备变形...",
+      "bat_form": "🦇你变成了蝙蝠！获得飞行能力，速度大幅提升，可以隐身和穿墙！",
+      "ghost_form": "👻你变成了幽灵！可以飞行和穿墙！",
+      "bat_effect_end": "🦇蝙蝠形态结束，恢复正常！",
+      "ghost_effect_end": "👻幽灵形态结束，恢复正常！",
+      "completed": "🔄变身术效果结束，恢复原形！",
+      "cannot_use": "❌现在不能使用变身术！"
+    },
+    "shotgun": {
+      "name": "🔫猎枪🎯",
+      "introduce": "🔫在准星位置造成爆炸，对命中实体造成2点伤害！",
+      "notice": "🎯瞄准敌人射击，爆炸效果震撼全场！",
+      "activated": "🔫猎枪射击！💥",
+      "hit_entity": "🎯命中敌人造成{{damage}}点伤害！",
+      "no_hit": "❌没有命中目标！",
+      "hit_by_shotgun": "💥你被{{player}}的猎枪击中了！",
+      "shot_fired": "🔫猎枪已发射！",
+      "missed": "❌猎枪射击未命中目标！"
     }
   },
   "skill.default": "🔄默认技能🎮",
