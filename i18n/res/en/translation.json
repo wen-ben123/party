@@ -249,9 +249,12 @@
     },
     "dash": {
       "name": "🏃‍♂️Dash💨",
-      "introduce": "🎯Dash towards crosshair direction, knocks back hit players💥",
-      "notice": "💨Dashing is super exciting! But control your direction, or you'll fly out~🏃‍♂️✨",
-      "hit_message": "💥You were hit by {{playerName}}'s [Dash] skill!🏃‍♂️"
+      "introduce": "🎯Dash towards crosshair direction, deals 2 damage and knocks back hit players💥, gain 1s invulnerability🛡️",
+      "notice": "💨Super Dash is here! Now with invulnerability and damage, but control your direction~🏃‍♂️✨",
+      "hit_message": "💥You were hit by {{player}}'s [Dash] skill!🏃‍♂️",
+      "hit_damage": "💔{{player}}'s Dash dealt {{damage}} damage to you!🏃‍♂️💥",
+      "invulnerable_start": "🛡️Dash invulnerability activated!💫",
+      "invulnerable_end": "✨Dash invulnerability ended🛡️"
     },
     "chorus_fruit": {
       "name": "🍇Chorus Fruit✨",
@@ -277,8 +280,8 @@
     },
     "spider_man": {
       "name": "🕷️Spider-Man",
-      "introduce": "Shoot webs to pull enemies or move quickly",
-      "notice": "🏹Grappling hook is super cool! Can pull enemies or launch yourself, like Spider-Man swinging around~🕷️✨",
+      "introduce": "Shoot ultra-fast webs to powerfully pull enemies or move at extreme speed, no speed limits!⚡",
+      "notice": "🏹Super web incoming! Now with faster pull and movement speeds for the ultimate Spider-Man experience~🕷️✨",
       "shoot_web": "🕸️Web shot!🎯",
       "pull_message": "🕸️You were touched by {{player}}'s web and pulled over!👥",
       "catch_message": "🕸️You were caught by {{player}}'s web!🔒",
@@ -361,13 +364,20 @@
       "charging": "⚡Charging energy blast..."
     },
     "aura_field": {
-      "name": "💫Aura Field✨",
-      "introduce": "Release mysterious aura energy, all entities within 15 blocks take -1 to 1 random damage or healing every 0.1 seconds!",
-      "notice": "Aura field effects are random, may cause damage or healing, lasts 10 seconds, triggers every 0.1 seconds!✨",
-      "activated": "💫Aura Field activated! Starting to affect all surrounding entities~✨",
-      "deactivated": "💫Aura field effect ended, aura slowly dissipates...✨",
-      "hit_by_aura": "💫Oops! Hit by {{player}}'s aura energy, took {{damage}} damage💔",
-      "healed_by_aura": "💚Wow! Healed by {{player}}'s aura energy, restored {{amount}} HP❤️✨"
+      "name": "💫Aura Suppression✨",
+      "introduce": "Release intelligent aura energy, entities within 15 blocks receive -1.5 to 1.5 random effects every 0.1 seconds! Effects weaken with distance, net damage increases cooldown, net healing reduces cooldown!🧠",
+      "notice": "💡Smart aura field weakens with distance! Dealing damage increases cooldown, healing reduces cooldown, super strategic!✨",
+      "activated": "💫Smart Aura Field activated! Starting intelligent regulation of surrounding entities~✨",
+      "deactivated": "💫Smart Aura Field effect ended, aura data analysis complete~✨",
+      "hit_by_aura": "💫Oops! Affected by {{player}}'s smart aura field, took {{damage}} damage💔",
+      "healed_by_aura": "💚Wow! Healed by {{player}}'s smart aura field, restored {{amount}} HP❤️✨",
+      "total_damage": "💥 Total Damage",
+      "total_heals": "💚 Total Healing",
+      "affected_entities": "👥 Affected Entities",
+      "cooldown_increased": "🔥 Cooldown Increased",
+      "cooldown_decreased": "❄️ Cooldown Decreased",
+      "skill_end_summary": "✨ Aura Skill Ended - {{summary}}",
+      "effect_error": "💫Aura Field Effect Error✨"
     }
   },
   "skill.default": "🔄Default Skill🎮",

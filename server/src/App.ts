@@ -613,7 +613,7 @@ async function magicHatEffect(entity, duration = 5000) {
 // await applySkillEffect(entity, 'candy', { count: 2 });
 // await applySkillEffect(entity, 'ghost', { count: 1 });
 // await applySkillEffect(entity, 'magic_hat', { duration: 5000 });
-// 气场发散效果函数 - 15格内实体受到-1到1的随机伤害调整 ✨
+// 智能气场发散效果函数 - 距离衰减 + 动态冷却调整 ✨
 async function auraFieldEffect(entity, duration = 10000) {
   try {
     // 激活消息 - 静默处理，不播报
@@ -631,7 +631,7 @@ async function auraFieldEffect(entity, duration = 10000) {
     let totalHeals = 0;
     let affectedEntities = new Set();
 
-    // 创建气场效果定时器 - 类似能量爆破的直接伤害机制
+    // 创建气场效果定时器 - 智能平衡机制
     const auraInterval = setInterval(() => {
       if (!entity || entity.destroyed) {
         clearInterval(auraInterval);
@@ -642,27 +642,32 @@ async function auraFieldEffect(entity, duration = 10000) {
       const nearbyEntities = world.querySelectorAll('*').filter((e) => {
         if (!e.position || e === entity || e.destroyed || e.isInvincible)
           return false;
-        // 排除糖果和TNT实体 💨
+        // 排除糖果和TNT实体
         if (e.hasTag && (e.hasTag('candy') || e.hasTag('TNT'))) return false;
         if (e.isCandy)
           // 额外的糖果检查
           return false;
-        // 只影响场内玩家，不影响场外玩家 🛡️
+        // 只影响场内玩家，不影响场外玩家
         if (e.isPlayer && !PlayerInGame.includes(e.player.name)) return false;
         const distance = e.position.distance(entity.position);
         return distance <= 15;
       });
 
-      // 对每个范围内的实体直接应用随机伤害
+      // 对每个范围内的实体应用智能效果
       nearbyEntities.forEach((targetEntity) => {
         affectedEntities.add(targetEntity);
 
-        // 随机伤害：-1到1之间（负值表示治疗，正值表示额外伤害）
-        const randomDamage = -1 + Math.random() * 2;
+        // 计算距离衰减系数 📏
+        const distance = targetEntity.position.distance(entity.position);
+        const distanceFactor = Math.max(0.2, 1 - (distance / 15) * 0.7); // 距离越远效果越弱，最低20%效果
 
-        if (randomDamage > 0) {
+        // 随机伤害：-1.5到1.5之间（负值表示治疗，正值表示额外伤害）
+        const baseDamage = -1.5 + Math.random() * 3; // 扩展随机范围到±1.5
+        const adjustedDamage = baseDamage * distanceFactor;
+
+        if (adjustedDamage > 0) {
           // 正值 - 造成额外伤害
-          const damageAmount = Math.abs(randomDamage);
+          const damageAmount = Math.abs(adjustedDamage);
           targetEntity.hurt(damageAmount, {
             attacker: entity,
             damageType: i18n.t('skill.aura_field.name'),
@@ -671,16 +676,21 @@ async function auraFieldEffect(entity, duration = 10000) {
           recordDamageDealt(entity, damageAmount);
           totalDamage += damageAmount;
 
-          // 伤害视觉效果 - 红色粒子
+          // 伤害视觉效果 - 红色粒子（受距离影响调整颜色强度）
+          const intensity = Math.min(1, distanceFactor + 0.3);
           Object.assign(targetEntity, {
             particleRate: 60,
-            particleColor: new GameRGBColor(1, 0.2, 0.2),
+            particleColor: new GameRGBColor(
+              1,
+              0.2 * intensity,
+              0.2 * intensity
+            ),
             particleLifetime: 0.8,
             particleSize: [3, 2, 1],
           });
-        } else if (randomDamage < 0) {
+        } else if (adjustedDamage < 0) {
           // 负值 - 治疗效果
-          const healAmount = Math.abs(randomDamage);
+          const healAmount = Math.abs(adjustedDamage);
           targetEntity.hp += healAmount;
           if (targetEntity.hp > targetEntity.maxHp) {
             targetEntity.hp = targetEntity.maxHp;
@@ -695,17 +705,15 @@ async function auraFieldEffect(entity, duration = 10000) {
           }
           totalHeals += healAmount;
 
-          // 治疗类型为气场时不播报 💨
-          // 注意：这里是气场技能的治疗效果，所以不需要播报消息
-          // 如果以后需要播报，可以取消下面的注释
-          // if (targetEntity.player) {
-          //   targetEntity.player.directMessage(i18n.t('skill.magic_hat.heal', { amount: healAmount }));
-          // }
-
-          // 治疗视觉效果 - 绿色粒子
+          // 治疗视觉效果 - 绿色粒子（受距离影响调整颜色强度）
+          const intensity = Math.min(1, distanceFactor + 0.3);
           Object.assign(targetEntity, {
             particleRate: 60,
-            particleColor: new GameRGBColor(0.2, 1, 0.2),
+            particleColor: new GameRGBColor(
+              0.2 * intensity,
+              1,
+              0.2 * intensity
+            ),
             particleLifetime: 0.8,
             particleSize: [3, 2, 1],
           });
@@ -733,26 +741,72 @@ async function auraFieldEffect(entity, duration = 10000) {
         });
       }
 
-      // 发送汇总统计消息 - 保留伤害、治疗、影响实体统计
+      // 计算动态冷却调整 🔄
+      const netEffect = totalDamage - totalHeals; // 正值表示净伤害，负值表示净治疗
+      let cooldownAdjustment = 0;
+
+      if (netEffect > 0) {
+        // 净伤害：增加冷却时间（每点净伤害增加1秒）
+        cooldownAdjustment = Math.round(netEffect * 1000); // 转换为毫秒
+      } else if (netEffect < 0) {
+        // 净治疗：减少冷却时间（每点净治疗减少1秒，最多减少基础冷却的50%）
+        cooldownAdjustment = Math.round(netEffect * 1000); // 负值表示减少
+      }
+
+      // 应用冷却调整（限制在±50%基础冷却时间内）
+      const baseCooldown = 12000; // 12秒基础冷却
+      const maxAdjustment = baseCooldown * 0.5; // 最多调整50%
+      const finalAdjustment = Math.max(
+        -maxAdjustment,
+        Math.min(maxAdjustment, cooldownAdjustment)
+      );
+
+      // 获取气场发散技能对象并更新冷却时间（仿照修理工技能的方式）
+      const auraFieldSkill = skillList.find(
+        (skill) => skill.name === i18n.t('skill.aura_field.name')
+      );
+      if (auraFieldSkill) {
+        auraFieldSkill.cold += finalAdjustment;
+        auraFieldSkill.cold = Math.max(6000, auraFieldSkill.cold); // 最低6秒冷却
+      }
+
+      // 发送汇总统计消息 - 包含冷却调整信息
       const summaryMessages = [];
       if (totalDamage > 0) {
-        summaryMessages.push(`💥 总伤害: ${totalDamage.toFixed(1)}`);
+        summaryMessages.push(
+          `${i18n.t('skill.aura_field.total_damage')}: ${totalDamage.toFixed(1)}`
+        );
       }
       if (totalHeals > 0) {
-        summaryMessages.push(`💚 总治疗: ${totalHeals.toFixed(1)}`);
+        summaryMessages.push(
+          `${i18n.t('skill.aura_field.total_heals')}: ${totalHeals.toFixed(1)}`
+        );
       }
       if (affectedEntities.size > 0) {
-        summaryMessages.push(`👥 影响实体: ${affectedEntities.size}`);
+        summaryMessages.push(
+          `${i18n.t('skill.aura_field.affected_entities')}: ${affectedEntities.size}`
+        );
+      }
+
+      // 添加冷却调整信息
+      if (finalAdjustment !== 0) {
+        const adjustmentText =
+          finalAdjustment > 0
+            ? `${i18n.t('skill.aura_field.cooldown_increased')}: ${(finalAdjustment / 1000).toFixed(1)}${i18n.t('unit.second')}`
+            : `${i18n.t('skill.aura_field.cooldown_decreased')}: ${Math.abs(finalAdjustment / 1000).toFixed(1)}${i18n.t('unit.second')}`;
+        summaryMessages.push(adjustmentText);
       }
 
       if (summaryMessages.length > 0) {
         entity.player.directMessage(
-          `✨ 气场技能结束 - ${summaryMessages.join(' | ')}`
+          i18n.t('skill.aura_field.skill_end_summary', {
+            summary: summaryMessages.join(' | '),
+          })
         );
       }
     }, duration);
   } catch (e) {
-    console.warn('💫气场发散效果出错✨', e);
+    console.warn(i18n.t('skill.aura_field.effect_error'), e);
   }
 }
 
@@ -1141,21 +1195,53 @@ var skillList = [
     cold: 10000, // 冲刺冷却时间改为10秒 ⚡⏰
     async effect(entity, raycast) {
       if (raycast) {
+        // 🛡️ 添加短暂无敌效果
+        entity.invulnerable = true;
+        entity.player.directMessage(i18n.t('skill.dash.invulnerable_start'));
+
+        // ✨ 添加冲刺粒子特效
+        Object.assign(entity, {
+          particleRate: 50,
+          particleColor: new GameRGBColor(1, 0.5, 0), // 橙色粒子
+          particleLifetime: 1,
+          particleSize: [4, 3, 2, 1],
+        });
+
         var k = raycast.hitPosition;
         var direction = k.sub(entity.position);
         var dist = direction.mag();
-        var speed = 2;
+        var speed = 2.5; // 提升冲刺速度
+
         if (raycast.hitEntity && raycast.hitEntity.isPlayer) {
+          // 💥 对击中的玩家造成伤害
+          if (raycast.hitEntity.hp !== undefined) {
+            raycast.hitEntity.hp -= 2;
+            raycast.hitEntity.player.directMessage(
+              i18n.t('skill.dash.hit_damage', {
+                player: entity.player.name,
+                damage: 2,
+              })
+            );
+          }
+
           raycast.hitEntity.velocity.x = (direction.x * speed) / dist;
           raycast.hitEntity.velocity.z = (direction.z * speed) / dist;
-          raycast.hitEntity.velocity.y += 1;
+          raycast.hitEntity.velocity.y += 1.2; // 增强击退效果
           raycast.hitEntity.player.directMessage(
             i18n.t('skill.dash.hit_message', { player: entity.player.name })
           );
         }
+
         entity.velocity.x = (direction.x * speed) / dist;
         entity.velocity.z = (direction.z * speed) / dist;
         entity.velocity.y = 0;
+
+        // ⏰ 1秒后移除无敌效果和粒子
+        setTimeout(() => {
+          entity.invulnerable = false;
+          entity.particleRate = 0;
+          entity.player.directMessage(i18n.t('skill.dash.invulnerable_end'));
+        }, 1000);
       }
     },
   },
@@ -1316,13 +1402,10 @@ var skillList = [
                 const pullDirection = entity.position.sub(otherEntity.position);
                 const pullDist = pullDirection.mag();
 
-                // 设置被碰到实体的速度，拉向发射者
-                otherEntity.velocity.x = (pullDirection.x * 1.5) / pullDist;
-                otherEntity.velocity.z = (pullDirection.z * 1.5) / pullDist;
-                otherEntity.velocity.y = Math.max(
-                  0.5,
-                  (pullDirection.y * 1.5) / pullDist
-                );
+                // 设置被碰到实体的速度，拉向发射者（移除速度限制）🕷️✨
+                otherEntity.velocity.x = (pullDirection.x * 3) / pullDist;
+                otherEntity.velocity.z = (pullDirection.z * 3) / pullDist;
+                otherEntity.velocity.y = (pullDirection.y * 3) / pullDist;
 
                 // 通知被拉的玩家（如果是玩家实体）
                 if (otherEntity.player) {
@@ -1352,13 +1435,10 @@ var skillList = [
           // 给予被击中实体向发射者移动的速度（适用于所有实体类型）
           const pullDirection = entity.position.sub(raycast.hitEntity.position);
           const pullDist = pullDirection.mag();
-          // 给予被击中实体向发射者移动的速度
-          raycast.hitEntity.velocity.x = (pullDirection.x * 1.5) / pullDist;
-          raycast.hitEntity.velocity.z = (pullDirection.z * 1.5) / pullDist;
-          raycast.hitEntity.velocity.y = Math.max(
-            0.3,
-            (pullDirection.y * 1.5) / pullDist
-          );
+          // 给予被击中实体向发射者移动的速度（移除速度限制）🕷️✨
+          raycast.hitEntity.velocity.x = (pullDirection.x * 3) / pullDist;
+          raycast.hitEntity.velocity.z = (pullDirection.z * 3) / pullDist;
+          raycast.hitEntity.velocity.y = (pullDirection.y * 3) / pullDist;
 
           // 如果是玩家，通知被击中的玩家
           if (raycast.hitEntity.isPlayer) {
@@ -1369,17 +1449,17 @@ var skillList = [
             );
           }
 
-          // 设置玩家速度，向实体飞去
-          entity.velocity.x = (direction.x * 2) / dist;
-          entity.velocity.z = (direction.z * 2) / dist;
-          entity.velocity.y = Math.max(0.5, (direction.y * 2) / dist);
+          // 设置玩家速度，向实体飞去（移除速度限制）🕷️✨
+          entity.velocity.x = (direction.x * 4) / dist;
+          entity.velocity.z = (direction.z * 4) / dist;
+          entity.velocity.y = (direction.y * 4) / dist;
         } else {
           // 击中方块或空地，玩家向目标位置弹去
 
-          // 设置玩家速度，向目标弹去
-          entity.velocity.x = (direction.x * 1.5) / dist;
-          entity.velocity.z = (direction.z * 1.5) / dist;
-          entity.velocity.y = Math.max(1, (direction.y * 1.5) / dist + 0.5); // 额外添加y轴速度确保可以弹起
+          // 设置玩家速度，向目标弹去（移除速度限制）🕷️✨
+          entity.velocity.x = (direction.x * 4) / dist;
+          entity.velocity.z = (direction.z * 4) / dist;
+          entity.velocity.y = (direction.y * 4) / dist;
         }
 
         // 添加玩家周围的蛛丝特效
