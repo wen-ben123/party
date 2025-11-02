@@ -272,15 +272,15 @@
       "completed": "✨Magic effect ended, trick performance completed..."
     },
     "transformation": {
-      "name": "🦇Transformation✨",
-      "introduce": "Randomly transform into bat or ghost form, gain special abilities for 8 seconds",
-      "notice": "Bat form grants flight and speed boost, ghost form grants flight and intangibility (but still takes damage)",
-      "activated": "✨Transformation activated! Preparing random transformation...",
-      "bat_form": "🦇Transformed into bat form! Flight enhanced, speed greatly boosted, can become invisible and phase through walls!",
-      "ghost_form": "👻Transformed into ghost form! Flight and intangibility activated!",
-      "bat_effect_end": "🦇Bat form ended, returned to normal",
-      "ghost_effect_end": "👻Ghost form ended, returned to normal",
-      "completed": "✨Transformation ended, returned to human form..."
+      "name": "💉Serum Injection✨",
+      "introduce": "Randomly inject serum to become bat or ghost form, gain special abilities for 8 seconds",
+      "notice": "Serum bat form grants flight and speed boost, serum ghost form grants flight and intangibility (but still takes damage)",
+      "activated": "💉Serum injection activated! Preparing transformation...",
+      "bat_form": "🦇Injected serum into bat form! Flight enhanced, speed greatly boosted, can become invisible and phase through walls!",
+      "ghost_form": "👻Injected serum into ghost form! Flight and intangibility activated!",
+      "bat_effect_end": "🦇Bat form ended, serum effect disappeared",
+      "ghost_effect_end": "👻Ghost form ended, serum effect disappeared",
+      "completed": "✨Serum injection ended, returned to human form..."
     },
     "shotgun": {
       "name": "🔫Shotgun🎯",
@@ -292,6 +292,18 @@
       "hit_by_shotgun": "💥You were hit by {{player}}'s shotgun!",
       "shot_fired": "🔫Shotgun has been fired!",
       "missed": "❌Shotgun shot missed the target!"
+    },
+    "energy_blast": {
+      "name": "💥Energy Blast✨",
+      "introduce": "Charge up in place then launch a powerful energy orb, unable to move during charge, deals area explosion damage on hit!",
+      "notice": "Energy Blast requires charging in place, cannot move during charge, but deals lethal area damage on hit! ⚠️Warning: May damage yourself, easy to die instantly!",
+      "missed": "❌Energy blast missed the target!",
+      "hit_multiple": "💥Energy blast hit {{count}} targets!🎯",
+      "hit_ground": "💥Energy blast hit the ground, causing explosion effect!💥",
+      "fired": "💥Energy Blast fired successfully! Devastating strike!✨",
+      "miss_message": "😅 Oops, energy blast didn't hit any targets! Aim better next time~",
+      "hit_by_energy_blast": "💥You were hit by {{player}}'s energy blast!",
+      "charging": "⚡Charging energy blast..."
     }
   },
   "skill.default": "🔄Default Skill🎮",

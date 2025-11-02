@@ -68,10 +68,11 @@ world.onPlayerJoin(({ entity }) => {
     );
 
     // 限制玩家不能出平台（和其他实体同款）- 边界宽限3格 🎮
-    if (worldInGame && entity.position) {
+    // 观战模式玩家不受边界限制！👻
+    if (worldInGame && entity.position && !entity.player.spectator) {
       const centerX = 65;
       const centerZ = 65;
-      const radius = 28; // 宽限3格，原25→28 🎯
+      const radius = 30; // 再给玩家宽限2格！原28→30 🎯✨
       const dx = entity.position.x - centerX;
       const dz = entity.position.z - centerZ;
       const distance = Math.sqrt(dx * dx + dz * dz);
@@ -86,14 +87,14 @@ world.onPlayerJoin(({ entity }) => {
         entity.position.x = newX;
         entity.position.z = newZ;
 
-        // 如果玩家有速度，添加非常温和的阻尼效果（几乎无反弹）
+        // 如果玩家有速度，添加激烈的边界碰撞效果！💥
         if (entity.velocity) {
           const normalizedDx = dx / distance;
           const normalizedDz = dz / distance;
           const dotProduct =
             entity.velocity.x * normalizedDx + entity.velocity.z * normalizedDz;
 
-          // 强烈的反弹效果！💥
+          // 激烈的反弹效果！💥 移除向上飞的能力
           entity.velocity.x =
             entity.velocity.x - dotProduct * normalizedDx * 2.5; // 强力反弹系数
           entity.velocity.z =
@@ -101,16 +102,13 @@ world.onPlayerJoin(({ entity }) => {
           entity.velocity.x *= 0.8; // 适度能量损失
           entity.velocity.z *= 0.8; // 适度能量损失
 
-          // 添加向上的弹起效果！🚀
-          entity.velocity.y = Math.max(entity.velocity.y, 0.5); // 向上弹起
-
-          // 移除向上弹起效果，保持水平移动自然
-          // entity.velocity.y 保持不变
+          // 移除向上弹起效果！🚫 不再让人向上飞
+          // entity.velocity.y = Math.max(entity.velocity.y, 0.5); // 移除这行！
         }
       }
 
       // 添加Y轴上限限制（防止玩家飞太高）🚀
-      const maxHeight = 120; // 设置最大高度限制
+      const maxHeight = 60;
       if (entity.position.y > maxHeight) {
         entity.position.y = maxHeight;
         if (entity.velocity) {
@@ -1343,7 +1341,7 @@ var skillList = [
     name: i18n.t('skill.transformation.name'),
     introduce: i18n.t('skill.transformation.introduce'),
     notice: i18n.t('skill.transformation.notice'),
-    cold: 30000,
+    cold: 20000,
     async effect(entity, raycast) {
       // 技能激活消息
       entity.player.directMessage(i18n.t('skill.transformation.activated'));
@@ -1533,6 +1531,143 @@ var skillList = [
       } else {
         // 未命中
         entity.player.directMessage(i18n.t('skill.shotgun.missed'));
+      }
+    },
+  },
+  {
+    name: i18n.t('skill.energy_blast.name'),
+    cold: 15000, // 15秒冷却
+    introduce: i18n.t('skill.energy_blast.introduce'),
+    notice: i18n.t('skill.energy_blast.notice'),
+    effect: async (entity, raycast) => {
+      // 无论是否命中，都继续执行爆炸效果 💥✨
+      if (!raycast.hitEntity && !raycast.hitBlock) {
+        entity.player.directMessage(i18n.t('skill.energy_blast.missed'));
+        // 继续执行，即使没有命中目标也要破坏地形
+      }
+
+      // 🎯 开始蓄力
+      entity.player.directMessage(i18n.t('skill.energy_blast.charging'));
+      // 🔋 蓄力特效 - 逐渐增强的能量聚集效果
+      Object.assign(entity, {
+        particleRate: 120,
+        particleColor: new GameRGBColor(0.1, 0.7, 1),
+        particleLifetime: 0.8,
+        particleSize: [2, 3, 4, 5, 6], // 逐渐变大
+      });
+
+      // ⏱️ 蓄力3秒
+      await sleep(3000);
+      // 💥 发射能量球！
+      entity.player.directMessage(i18n.t('skill.energy_blast.fired'));
+
+      // 确定爆炸位置：如果命中了目标就用命中位置，否则用射线前方30格位置 💥🎯
+      const blastPosition =
+        raycast.hitPosition || entity.position.add(entity.forward.multiply(30));
+
+      // 创建TNT同款爆炸效果 💥
+      explodeVoxel(blastPosition); // 大范围破坏方块
+      explodePlayer(blastPosition); // 对玩家造成伤害和击退效果
+
+      // 添加TNT同款的爆炸粒子效果 ✨
+      Object.assign(entity, {
+        particleRate: 150,
+        particleColor: new GameRGBColor(1, 0.5, 0),
+        particleLifetime: 0.5,
+        particleSize: [6, 4, 2, 1],
+      });
+
+      // 仿照猎枪的范围伤害机制 💥🔫
+      let hitCount = 0;
+
+      // 先处理直接命中的目标（如果有）
+      if (raycast.hitEntity && raycast.hitEntity.isPlayer) {
+        const targetEntity = raycast.hitEntity;
+
+        // 直接命中造成更高伤害
+        targetEntity.hurt(5, {
+          attacker: entity,
+          damageType: i18n.t('skill.energy_blast.name'),
+        });
+
+        // 发送被击中消息
+        targetEntity.player.directMessage(
+          i18n.t('skill.energy_blast.hit_by_energy_blast', {
+            player: entity.player.name,
+          })
+        );
+
+        // TNT同款的直接命中爆炸特效 💥
+        Object.assign(targetEntity, {
+          particleRate: 120,
+          particleColor: new GameRGBColor(1, 0.2, 0),
+          particleLifetime: 0.6,
+          particleSize: [5, 3, 2, 1],
+        });
+
+        // 1秒后移除粒子效果
+        setTimeout(() => {
+          if (targetEntity && !targetEntity.destroyed) {
+            Object.assign(targetEntity, {
+              particleRate: 0,
+            });
+          }
+        }, 1000);
+
+        hitCount++;
+      }
+
+      // 对范围内的其他实体造成伤害（仿照猎枪的TNT风格范围伤害）
+      const damageRadius = 6; // 6格范围伤害
+      world.querySelectorAll('player').forEach((otherEntity) => {
+        // 排除施法者和已经直接命中的目标
+        if (otherEntity !== entity && otherEntity !== raycast.hitEntity) {
+          const distance = otherEntity.position.distance(blastPosition);
+          if (distance <= damageRadius) {
+            // 仿照猎枪的伤害计算：距离越近伤害越高
+            const damageAmount = Math.max(2, Math.round(12 / distance));
+            otherEntity.hurt(damageAmount, {
+              attacker: entity,
+              damageType: i18n.t('skill.energy_blast.name'),
+            });
+
+            // 添加TNT风格的范围伤害效果（仿照猎枪）
+            Object.assign(otherEntity, {
+              particleRate: 60,
+              particleColor: new GameRGBColor(1, 0.3, 0),
+              particleLifetime: 0.4,
+              particleSize: [3, 2, 1],
+            });
+
+            // 0.5秒后移除粒子效果
+            setTimeout(() => {
+              if (otherEntity && !otherEntity.destroyed) {
+                Object.assign(otherEntity, {
+                  particleRate: 0,
+                });
+              }
+            }, 500);
+
+            hitCount++;
+          }
+        }
+      });
+
+      // 🎉 蓄力完成
+      // 移除施法者的粒子效果
+      setTimeout(() => {
+        Object.assign(entity, {
+          particleRate: 0,
+        });
+      }, 800);
+
+      if (hitCount > 0) {
+        entity.player.directMessage(
+          i18n.t('skill.energy_blast.hit_multiple', { count: hitCount })
+        );
+      } else {
+        entity.player.directMessage(i18n.t('skill.energy_blast.hit_ground'));
+        entity.player.directMessage(i18n.t('skill.energy_blast.miss_message'));
       }
     },
   },
@@ -3153,49 +3288,45 @@ async function handleCandyInteraction(player, candy) {
 
       case 2: // 修复地面
         player.player.directMessage(i18n.t('candy.terrain_repairing'));
-        // 找到玩家脚下最近的地面层并修复
-        const playerX = Math.round(player.position.x);
-        const playerZ = Math.round(player.position.z);
-        let repairY = Math.floor(player.position.y);
 
-        // 向下查找最近的地面
-        while (repairY > 0) {
-          const voxelName = voxels.name(
-            voxels.getVoxelId(playerX, repairY, playerZ)
-          );
-          if (voxelName && voxelName !== 'air') {
-            break;
+        // 使用与修复工技能相同的修复方式！🔧✨
+        const centerX = Math.round(player.position.x);
+        const centerZ = Math.round(player.position.z);
+
+        // 修复平台：直接在玩家脚下位置生成 🔧
+        // 由于是修复技能，不需要检查是否有非空气方块
+        // 限制平台生成高度范围：最低10，最高60 🌟
+        const nearestPlatformY = Math.floor(
+          Math.max(10, Math.min(50, player.position.y - 2))
+        ); // 在玩家脚下生成平台，限制高度范围
+
+        // 生成平台方块，使用草方块填充，只替换空气方块 🌱
+        // 与修复工技能一样，使用半径5的大范围修复！
+        createVoxelPlatform(
+          nearestPlatformY,
+          'grass',
+          5,
+          centerX,
+          centerZ,
+          true
+        );
+
+        // 显示平台创建成功消息
+        player.player.directMessage(i18n.t('skill.repairman.platform_created'));
+
+        // 添加修复工同款视觉效果！✨
+        Object.assign(player, {
+          particleRate: 50,
+          particleColor: new GameRGBColor(0.5, 1, 0.5),
+          particleLifetime: 1,
+          particleSize: [3, 3, 3, 2, 1],
+        });
+        setTimeout(() => {
+          if (player && !player.destroyed) {
+            Object.assign(player, { particleRate: 0 });
           }
-          repairY--;
-        }
+        }, 1000);
 
-        // 修复该层周围的地面（5x5区域）使用createVoxelPlatform函数
-        createVoxelPlatform(repairY, 'grass', 2, playerX, playerZ, true);
-
-        // 为每个修复的方块添加效果粒子
-        for (let x = playerX - 2; x <= playerX + 2; x++) {
-          for (let z = playerZ - 2; z <= playerZ + 2; z++) {
-            // 只在需要修复的位置添加粒子效果
-            if (voxels.name(voxels.getVoxelId(x, repairY, z)) === 'grass') {
-              const repairEffect = world.createEntity({
-                mesh: 'mesh/white_light.vb',
-                meshScale: [0.1, 0.1, 0.1],
-                fixed: true,
-                collides: false,
-                position: new GameVector3(x, repairY + 0.5, z),
-              });
-              Object.assign(repairEffect, {
-                particleRate: 50,
-                particleColor: new GameRGBColor(0.5, 1, 0.5),
-                particleLifetime: 0.5,
-                particleSize: [3, 2, 1, 0.5, 0.2],
-              });
-              setTimeout(() => {
-                repairEffect.destroy();
-              }, 500);
-            }
-          }
-        }
         player.player.directMessage(i18n.t('candy.terrain_repaired'));
         break;
     }
