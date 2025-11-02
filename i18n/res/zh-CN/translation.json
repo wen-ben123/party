@@ -37,7 +37,9 @@
     "candy_heal_broadcast": "🍬{{playerName}}使用了糖果恢复生命值！",
     "skill_rescue_platform_triggered": "🛟救生平台已激活！但消耗了30点生命值！💔",
     "health_info": "❤️当前血量：{{current}}",
-    "magic": "魔法伤害✨"
+    "magic": "魔法伤害✨",
+    "skill_rescue_platform_consumption": "救生平台消耗",
+    "unknown": "未知伤害❓"
   },
   "gui": {
     "skill": "🧙‍♂️技能",
@@ -74,6 +76,30 @@
     "cancel": "❌取消🚫",
     "game_guide_title": "🎮游戏玩法指南🎯",
     "view_game_rules": "📖查看游戏规则📚",
+    "view_last_game_data": "📊查看上一局数据📈",
+    "last_game_data_title": "📊上一局游戏数据📈",
+    "no_last_game_data": "📝暂无上一局游戏数据",
+    "no_winners": "🤷‍♂️无获胜者",
+    "last_game_basic_info": "🎮游戏模式：{{mode}}\n⏱️游戏时长：{{minutes}}分{{seconds}}秒\n👥参与玩家：{{players}}人\n👑获胜者：{{winners}}",
+    "last_game_stats": "📊游戏统计：",
+    "last_game_tnt_count": "💣TNT生成：{{count}}个",
+    "last_game_bat_count": "🦇蝙蝠生成：{{count}}只",
+    "last_game_ghost_count": "👻幽灵生成：{{count}}个",
+    "last_game_candy_count": "🍬糖果生成：{{count}}个",
+    "last_game_blocks_destroyed": "🧱方块破坏：{{count}}个",
+    "last_game_player_details": "👤玩家详细数据：",
+    "last_game_player_health": "❤️生命值：{{current}}/{{max}}",
+    "last_game_player_survival_time": "⏱️生存时间：{{seconds}}秒",
+    "last_game_player_damage_taken": "💥承受伤害：{{damage}}",
+    "last_game_player_damage_dealt": "⚔️造成伤害：{{damage}}",
+    "last_game_player_heals": "💚治疗次数：{{count}}",
+    "last_game_player_skills": "🎮技能使用：{{count}}次",
+    "last_game_player_bats_killed": "🦇击杀蝙蝠：{{count}}只",
+    "last_game_player_ghosts_killed": "👻击杀幽灵：{{count}}个",
+    "last_game_player_candies": "🍬收集糖果：{{count}}个",
+    "last_game_player_death_type": "💀死亡方式：{{type}}",
+    "last_game_player_won": "🏆获胜✨",
+    "last_game_player_lost": "💀失败",
     "game_guide_content": "👻万圣节派对玩法说明：\n\n1️⃣ 生存挑战：保持站在地面上，避免掉落虚空\n2️⃣ 小心蝙蝠：🦇蝙蝠会攻击玩家，降低生命值\n3️⃣ 躲避怨灵：👻怨灵会追踪玩家并爆炸，爆炸可能伤害或治愈你\n4️⃣ 收集糖果：🍬拾取糖果获得三种效果：恢复生命❤️、清除蝙蝠🦇或修复地面🧱\n5️⃣ 技能使用：左键使用技能，右键查看游戏信息\n6️⃣ 胜利条件：单人模式生存4分钟🏆，多人模式击败所有对手👑\n\n祝你游戏愉快！🎃",
     "close": "✖️关闭🗙"
   },
@@ -95,7 +121,6 @@
     "no_record": "📝你还没有游戏记录，现在开始你的第一场游戏吧！🚀",
     "error": "❌无法获取历史记录，请稍后再试。🕰️"
   },
-
   "countdown": {
     "to_game_start": "🎃万圣节派对将在{{seconds}}秒后开始！参与怪物数量：{{playerCount}}{{mode}}👻"
   },
@@ -139,7 +164,8 @@
     "bat_killed": "🦇你成功击杀了一只蝙蝠！✨",
     "ghost_killed": "👻你成功消灭了一个幽灵！✨",
     "join_success": "✅成功加入游戏！🎮",
-    "all_blocks_destroyed": "💥所有方块都被摧毁了！🧱"
+    "all_blocks_destroyed": "💥所有方块都被摧毁了！🧱",
+    "game_over_last_game_hint": "📊 游戏结束！输入 /lastgame 查看上一局详细数据~"
   },
   "mode": {
     "solo": "👤（单人）",
@@ -163,7 +189,30 @@
   "game_status": "⏱️游戏时间：{{minutes}}分{{seconds}}秒 | 剩余：{{players}}个玩家 | 剩余方块：{{blocks}} | [{{skill}}] {{status}}🎮",
 
   "error": {
-    "unsupported_element_type": "❌不支持的元素类型: {{type}}🔧"
+    "unsupported_element_type": "❌不支持的元素类型: {{type}}🔧",
+    "heal_player_hp_unavailable": "尝试治疗玩家，但hp属性不可用",
+    "ghost_init_failed": "幽灵初始化失败：hp或maxHp属性未正确设置",
+    "enable_candy_collision_error": "启用糖果碰撞体积时出错：",
+    "candy_boundary_check_error": "糖果边界检查时出错：",
+    "bat_explosion": "🦇蝙蝠爆炸错误💥",
+    "checking_blocks": "❌检查方块时出错🧱",
+    "cleaning_bats": "❌清理蝙蝠时出错🦇",
+    "count_blocks_failed": "❌计算方块失败🧱",
+    "tnt_timer": "❌TNT计时器错误:⏱️",
+    "bat_interval": "❌蝙蝠生成间隔错误🦇",
+    "cannot_summon_bat": "❌无法召唤蝙蝠:🦇",
+    "candy_lifetime": "糖果生命周期处理错误",
+    "summon_candy": "召唤糖果时出错",
+    "candy_interaction": "糖果交互处理错误",
+    "candy_detection": "糖果检测错误",
+    "cleaning_candies": "清理糖果时出错",
+    "ghost_update": "👻幽灵更新错误💨",
+    "summon_ghost": "👻召唤幽灵时出错💨",
+    "ghost_explosion": "👻幽灵爆炸错误💥",
+    "aura_field": "💫光环力场效果错误✨"
+  },
+  "events": {
+    "ghost_appeared": "👻 幽灵出现了！小心看不见的威胁..."
   },
   "entity": {
     "bat": {
@@ -171,7 +220,9 @@
     },
     "ghost": {
       "bounced": "👻你被幽灵弹飞了！快跑！💨",
-      "about_to_explode": "💥幽灵即将爆炸！远离！⚠️"
+      "about_to_explode": "💥幽灵即将爆炸！远离！⚠️",
+      "health_decay": "💔幽灵的生命力在流逝...👻",
+      "weak_warning": "👻幽灵变得虚弱了！血量低于30%！💀"
     }
   },
   "cat_trap": {
@@ -182,25 +233,25 @@
     "old_shoes": {
       "name": "👟老头的疾跑鞋🏃‍♂️",
       "introduce": "⏱️5秒内增加移动速度和跳跃高度💨",
-      "notice": "🚀穿上它跑得更快，跳得更高！🦘",
+      "notice": "🚀穿上疾跑鞋，速度飙升还能超级跳跃！超好玩哒~🦘✨",
       "effect_end": "🏃‍♂️疾跑鞋效果结束💨"
     },
     "use_success": "🎮你使用了{{skill}}技能✨",
     "heal": {
       "name": "❤️‍🩹治疗✨",
       "introduce": "💚恢复70%最大生命值📈",
-      "notice": "👍非常有用！❤️"
+      "notice": "💖治疗术超级有用！能恢复70%生命值呢~✨"
     },
     "dash": {
       "name": "🏃‍♂️冲刺💨",
       "introduce": "🎯向准星方向冲刺，击中玩家时会击退💥",
-      "notice": "⚠️小心不要冲得太猛！🏃‍♂️",
+      "notice": "💨冲刺超刺激！但记得控制好方向哦，不然会飞出去哒~🏃‍♂️✨",
       "hit_message": "💥你被{{player}}的[冲刺]技能击中了！🏃‍♂️"
     },
     "chorus_fruit": {
       "name": "🍇紫颂果✨",
       "introduce": "🎲随机传送到平台上存在的方块上（幸运符）🔀",
-      "notice": "⚠️你可能会传送到有裂开警告的方块上！🧱"
+      "notice": "✨紫颂果会随机传送你哦~小心别传到快裂开的方块上！🧱💕"
     },
     "bounce_tnt": {
       "name": "💣弹跳TNT↩️",
@@ -210,7 +261,7 @@
     "safe_platform": {
       "name": "🛟救援平台🧱",
       "introduce": "🌌当你掉进虚空时，会在最下方的黄色层生成5×5的平台并救你🛟",
-      "notice": "🔄这是一次性被动技能！无需激活！❌"
+      "notice": "🛡️安全平台花费30血救你的命！掉进虚空时会自动生成平台救你，但要消耗30生命值哦~💕"
     },
     "cat_trap": {
       "name": "🐱喵陷阱🕳️",
@@ -222,7 +273,7 @@
     "spider_man": {
       "name": "🕷️蜘蛛侠",
       "introduce": "发射蛛丝，拉拽敌人或快速移动",
-      "notice": "瞄准实体或方块发射，可拉拽敌人或弹向目标",
+      "notice": "🏹抓钩超酷的！可以拉拽敌人或者把自己弹向目标，像蜘蛛侠一样飞来飞去~🕷️✨",
       "shoot_web": "🕸️射出蛛丝！🎯",
       "pull_message": "🕸️你被{{player}}的蛛丝碰到并被拉了过去！👥",
       "catch_message": "🕸️你被{{player}}的蛛丝抓住了！🔒",
@@ -236,7 +287,7 @@
     "shield_block": {
       "name": "🛡️魔法护盾✨",
       "introduce": "🔒获得3秒无敌状态，免疫所有伤害💥",
-      "notice": "⚔️关键时刻使用它来躲避致命伤害！😱",
+      "notice": "🛡️魔法护盾超神奇的！可以抵挡所有伤害，关键时刻能救你一命呢~✨💕",
       "activated": "✨魔法护盾已激活！你现在是无敌的！🛡️",
       "deactivated": "💫魔法护盾效果结束💨"
     },
@@ -244,7 +295,7 @@
     "repairman": {
       "name": "🔧维修工🛠️",
       "introduce": "⏱️25秒冷却，在脚下生成临时平台，每次使用扣10血并增加5秒冷却🩸",
-      "notice": "⚠️血量低于10无法使用，每次使用增加5秒冷却时间",
+      "notice": "🔧修理匠超厉害的！可以造平台但是要消耗生命值，记得要合理使用哦~💕",
       "platform_created": "🛠️平台已创建！",
       "health_deducted": "🩸生命值扣除{{amount}}点",
       "low_health": "⚠️血量不足，无法使用！",
@@ -253,7 +304,7 @@
     "magic_hat": {
       "name": "🎩幻影魔术师的戏法帽✨",
       "introduce": "⏱️10秒冷却，随机施展8种神奇戏法：治疗、伤害、召唤、传送、糖果雨、幽灵助手、护盾、加速🎲",
-      "notice": "🎭每次使用都会随机触发不同效果，充满惊喜的魔术表演！",
+      "notice": "🎩魔术帽超神奇的！每次都会随机变出不同的魔法效果，就像真的魔术表演一样惊喜~✨💕",
       "activated": "✨魔法效果激活，准备施展随机戏法...",
       "heal": "🌟神奇治疗！恢复{{amount}}点生命值💚",
       "damage": "💥魔法爆炸！造成{{amount}}点伤害💔",
@@ -270,19 +321,22 @@
     "transformation": {
       "name": "💉注射血清✨",
       "introduce": "⏱️随机注射血清变成蝙蝠或幽灵，获得特殊能力持续8秒🎭",
-      "notice": "🎲注射血清变身为蝙蝠可飞行和速度提升，变身为幽灵可飞行和穿墙（但会受到伤害）！",
+      "notice": "💉血清注射超酷的！可以变成蝙蝠或者幽灵，每种形态都有超厉害的特殊能力呢~✨🦇👻",
       "activated": "💉注射血清激活！准备变形...",
       "bat_form": "🦇你注射血清变成了蝙蝠！获得飞行能力，速度大幅提升，可以隐身和穿墙！",
       "ghost_form": "👻你注射血清变成了幽灵！可以飞行和穿墙！",
       "bat_effect_end": "🦇蝙蝠形态结束，血清效果消失！",
       "ghost_effect_end": "👻幽灵形态结束，血清效果消失！",
       "completed": "🔄注射血清效果结束，恢复原形！",
-      "cannot_use": "❌现在不能注射血清！"
+      "cannot_use": "❌现在不能注射血清！",
+      "bat_collision": "🦇蝙蝠撞击",
+      "bat_hit_by_bat": "💥你被{{player}}的蝙蝠形态撞击了！",
+      "bat_form_interrupted": "🦇蝙蝠形态被提前中断！"
     },
     "shotgun": {
       "name": "🔫猎枪🎯",
       "introduce": "🔫在准星位置造成爆炸，对命中实体造成2点伤害！",
-      "notice": "🎯瞄准敌人射击，爆炸效果震撼全场！",
+      "notice": "🔫霰弹枪超威风的！瞄准敌人射击，砰的一声爆炸效果震撼全场！",
       "activated": "🔫猎枪射击！💥",
       "hit_entity": "🎯命中敌人造成{{damage}}点伤害！",
       "no_hit": "❌没有命中目标！",
@@ -293,37 +347,28 @@
     "energy_blast": {
       "name": "💥能量爆破✨",
       "introduce": "原地蓄力后发射强大的能量球，蓄力期间无法移动，命中后造成范围爆炸伤害！",
-      "notice": "能量爆破需要原地蓄力，期间不能动弹，但命中造成致命范围伤害！⚠️警告：可能误伤自己，容易瞬间暴毙！",
+      "notice": "💥能量爆破超震撼的！需要蓄力但威力巨大，小心别炸到自己哦~记得要找好安全位置！⚡💕",
       "missed": "❌能量爆破未命中目标！",
       "hit_multiple": "💥能量爆破命中{{count}}个目标！🎯",
       "hit_ground": "💥能量爆破击中地面，造成爆炸效果！💥",
       "fired": "💥能量爆破发射成功！造成毁灭性打击！✨",
-      "miss_message": "😅 哎呀，能量爆破没打中任何目标！下次瞄准一点~",
+      "miss_message": "哎呀，能量爆破没打中任何目标！下次瞄准一点~",
       "hit_by_energy_blast": "💥你被{{player}}的能量爆破击中了！",
       "charging": "⚡正在蓄力能量爆破..."
+    },
+    "aura_field": {
+      "name": "💫气场发散✨",
+      "introduce": "释放神秘的气场能量，15格范围内的所有实体每0.1秒受到-1到1的随机伤害或治疗效果！",
+      "notice": "气场发散效果随机，可能造成伤害或治疗，持续10秒，每0.1秒触发一次！✨",
+      "activated": "💫气场发散已激活！开始影响周围的所有实体啦...✨",
+      "deactivated": "💫气场发散效果结束啦，气场慢慢消散...✨",
+      "hit_by_aura": "💫哎呀！被{{player}}的气场能量击中啦，受到了{{damage}}点伤害💔",
+      "healed_by_aura": "💚哇！被{{player}}的气场能量治愈啦，恢复了{{amount}}点生命值❤️✨"
     }
   },
   "skill.default": "🔄默认技能🎮",
   "gui.skill_status": "🎮技能状态📊",
   "tag.about_to_explode": "💥即将爆炸！⏳",
-
-  "errors": {
-    "bat_explosion": "🦇蝙蝠爆炸错误💥",
-    "checking_blocks": "❌检查方块错误🧱",
-    "cleaning_bats": "❌清理蝙蝠错误🦇",
-    "count_blocks_failed": "❌计算方块失败🧱",
-    "tnt_timer": "❌TNT计时器错误：⏱️",
-    "bat_interval": "❌蝙蝠生成间隔错误🦇",
-    "cannot_summon_bat": "❌无法召唤蝙蝠：🦇",
-    "candy_lifetime": "糖果生命周期处理出错",
-    "summon_candy": "生成糖果出错",
-    "candy_interaction": "糖果交互处理出错",
-    "candy_detection": "糖果检测出错",
-    "cleaning_candies": "清理糖果出错",
-    "ghost_update": "👻幽灵更新错误💨",
-    "summon_ghost": "👻生成幽灵出错💨",
-    "ghost_explosion": "👻幽灵爆炸错误💥"
-  },
 
   "unit": {
     "second": "秒⏱",

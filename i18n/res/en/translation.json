@@ -37,7 +37,9 @@
     "candy_heal_broadcast": "🍬{{playerName}} used candy to restore health!",
     "skill_rescue_platform_triggered": "🛟Rescue Platform activated! But cost 30 health points!💔",
     "health_info": "❤️Current Health: {{current}}",
-    "magic": "Magic Damage✨"
+    "magic": "Magic Damage✨",
+    "skill_rescue_platform_consumption": "Rescue Platform Consumption",
+    "unknown": "Unknown Damage❓"
   },
   "gui": {
     "skill": "🧙‍♂️Skill",
@@ -74,6 +76,30 @@
     "cancel": "❌Cancel🚫",
     "game_guide_title": "🎮Game Guide🎯",
     "view_game_rules": "📖View Game Rules📚",
+    "view_last_game_data": "📊View Last Game Data📈",
+    "last_game_data_title": "📊Last Game Data📈",
+    "no_last_game_data": "📝No last game data available",
+    "no_winners": "🤷‍♂️No winners",
+    "last_game_basic_info": "🎮Game Mode: {{mode}}\n⏱️Duration: {{minutes}}m {{seconds}}s\n👥Players: {{players}}\n👑Winners: {{winners}}",
+    "last_game_stats": "📊Game Statistics:",
+    "last_game_tnt_count": "💣TNT Spawned: {{count}}",
+    "last_game_bat_count": "🦇Bats Spawned: {{count}}",
+    "last_game_ghost_count": "👻Ghosts Spawned: {{count}}",
+    "last_game_candy_count": "🍬Candy Spawned: {{count}}",
+    "last_game_blocks_destroyed": "🧱Blocks Destroyed: {{count}}",
+    "last_game_player_details": "👤Player Details:",
+    "last_game_player_health": "❤️Health: {{current}}/{{max}}",
+    "last_game_player_survival_time": "⏱️Survival Time: {{seconds}}s",
+    "last_game_player_damage_taken": "💥Damage Taken: {{damage}}",
+    "last_game_player_damage_dealt": "⚔️Damage Dealt: {{damage}}",
+    "last_game_player_heals": "💚Heals: {{count}}",
+    "last_game_player_skills": "🎮Skills Used: {{count}}",
+    "last_game_player_bats_killed": "🦇Bats Killed: {{count}}",
+    "last_game_player_ghosts_killed": "👻Ghosts Killed: {{count}}",
+    "last_game_player_candies": "🍬Candy Collected: {{count}}",
+    "last_game_player_death_type": "💀Death Type: {{type}}",
+    "last_game_player_won": "🏆Won✨",
+    "last_game_player_lost": "💀Lost",
     "game_guide_content": "👻Halloween Party Instructions:\n\n1️⃣ Survival Challenge: Stay on the ground, avoid falling into the void\n2️⃣ Watch out for bats: 🦇Bats attack players and reduce health\n3️⃣ Avoid ghosts: 👻Ghosts will chase players and explode, explosion may damage or heal you\n4️⃣ Collect candy: 🍬Pick up candy for three effects: heal❤️, clear bats🦇, or repair terrain🧱\n5️⃣ Skills: Left-click to use skill, right-click to check game info\n6️⃣ Victory conditions: Survive 4 minutes in single player🏆, defeat all opponents in multiplayer👑\n\nHave fun!🎃",
     "close": "✖️Close🗙"
   },
@@ -140,8 +166,8 @@
     "ghost_killed": "👻You successfully eliminated a ghost!✨",
     "join_success": "✅Successfully joined the game!🎮",
     "all_blocks_destroyed": "💥All blocks have been destroyed!🧱",
-    "decoy_created": "🎭Cute decoy successfully summoned!✨",
-    "decoy_failed": "❌Decoy summoning failed, please try again!💫"
+
+    "game_over_last_game_hint": "📊 Game over! Type /lastgame to view detailed data from the last round~"
   },
   "mode": {
     "solo": "👤(Single)",
@@ -165,7 +191,30 @@
   "game_status": "⏱️Game Time: {{minutes}}m {{seconds}}s | Remaining: {{players}} players | Blocks: {{blocks}} | [{{skill}}] {{status}}🎮",
 
   "error": {
-    "unsupported_element_type": "❌Unsupported element type: {{type}}🔧"
+    "unsupported_element_type": "❌Unsupported element type: {{type}}🔧",
+    "heal_player_hp_unavailable": "Attempted to heal player, but hp attribute unavailable",
+    "ghost_init_failed": "Ghost initialization failed: hp or maxHp attributes not properly set",
+    "enable_candy_collision_error": "Error enabling candy collision volume:",
+    "candy_boundary_check_error": "Error checking candy boundary:",
+    "bat_explosion": "🦇Bat explosion error💥",
+    "checking_blocks": "❌Checking blocks error🧱",
+    "cleaning_bats": "❌Cleaning bats error🦇",
+    "count_blocks_failed": "❌Counting blocks failed🧱",
+    "tnt_timer": "❌TNT timer error:⏱️",
+    "bat_interval": "❌Bat spawn interval error🦇",
+    "cannot_summon_bat": "❌Cannot summon bat:🦇",
+    "candy_lifetime": "Candy lifetime processing error",
+    "summon_candy": "Error summoning candy",
+    "candy_interaction": "Candy interaction processing error",
+    "candy_detection": "Candy detection error",
+    "cleaning_candies": "Error cleaning candies",
+    "ghost_update": "👻Ghost update error💨",
+    "summon_ghost": "👻Error summoning ghost💨",
+    "ghost_explosion": "👻Ghost explosion error💥",
+    "aura_field": "💫Aura field effect error✨"
+  },
+  "events": {
+    "ghost_appeared": "👻 Ghost appeared! Beware of the invisible threat..."
   },
   "entity": {
     "bat": {
@@ -176,7 +225,9 @@
     },
     "ghost": {
       "bounced": "👻You were bounced by a ghost! Run!💨",
-      "about_to_explode": "💥Ghost about to explode! Stay away!⚠️"
+      "about_to_explode": "💥Ghost about to explode! Stay away!⚠️",
+      "health_decay": "💔Ghost's life force is fading...👻",
+      "weak_warning": "👻Ghost is getting weak! Health below 30%!💀"
     }
   },
   "cat_trap": {
@@ -187,47 +238,47 @@
     "old_shoes": {
       "name": "👟Old Man's Sprint Shoes🏃‍♂️",
       "introduce": "⏱️Increases movement speed and jump height for 5 seconds💨",
-      "notice": "🚀Wear them to run faster and jump higher!🦘",
+      "notice": "🚀Wear sprint shoes to boost speed and super jump! Super fun~🦘✨",
       "effect_end": "🏃‍♂️Sprint shoes effect ended💨"
     },
     "use_success": "🎮You used {{skill}} skill✨",
     "heal": {
       "name": "❤️‍🩹Heal✨",
       "introduce": "💚Restores 70% of max HP📈",
-      "notice": "👍Very useful!❤️"
+      "notice": "💖Healing spell is super useful! Restores 70% max HP~✨"
     },
     "dash": {
       "name": "🏃‍♂️Dash💨",
       "introduce": "🎯Dash towards crosshair direction, knocks back hit players💥",
-      "notice": "⚠️Be careful not to dash too hard!🏃‍♂️",
+      "notice": "💨Dashing is super exciting! But control your direction, or you'll fly out~🏃‍♂️✨",
       "hit_message": "💥You were hit by {{playerName}}'s [Dash] skill!🏃‍♂️"
     },
     "chorus_fruit": {
       "name": "🍇Chorus Fruit✨",
       "introduce": "🎲Randomly teleport to existing blocks on platform (Lucky Charm)🔀",
-      "notice": "⚠️You might teleport to blocks with cracking warnings!🧱"
+      "notice": "✨Chorus fruit randomly teleports you~ Be careful not to land on cracking blocks!🧱💕"
     },
     "bounce_tnt": {
       "name": "💣Bounce TNT↩️",
       "introduce": "🦇Bounces all TNT and bats within 4 block range💣",
-      "notice": "👥Essential team survival tool, also bounces annoying bats!🛡️"
+      "notice": "💣Bouncing TNT is super fun! Bounces around and goes BOOM! Don't get blown away~💥✨"
     },
     "safe_platform": {
       "name": "🛟Rescue Platform🧱",
       "introduce": "🌌When falling into void, generates 5×5 platform at bottom yellow layer to save you🛟",
-      "notice": "🔄This is a one-time passive skill! No activation needed!❌"
+      "notice": "🛡️Safe platform costs 30 HP to save your life! Automatically creates platform when falling into void, but consumes 30 health~💕"
     },
     "cat_trap": {
       "name": "🐱Meow Trap🕳️",
       "introduce": "🐱Gives all other players within 10 blocks Meow effect for 10 seconds😵",
-      "notice": "🐱What would you do with three days of meowing? Answer: Let's learn to meow together🎤",
+      "notice": "🐱Meow~ Spawns super cute exploding kittens to fight for you! They bounce around, cuteness overload!💕🐾",
       "effect_start": "🐱You were hit by {{player}}'s Meow Trap skill, vision blurred for 10 seconds😵",
       "effect_end": "🧹Meow effect removed✨"
     },
     "spider_man": {
       "name": "🕷️Spider-Man",
       "introduce": "Shoot webs to pull enemies or move quickly",
-      "notice": "Aim at entities or blocks to pull enemies or swing to target",
+      "notice": "🏹Grappling hook is super cool! Can pull enemies or launch yourself, like Spider-Man swinging around~🕷️✨",
       "shoot_web": "🕸️Web shot!🎯",
       "pull_message": "🕸️You were touched by {{player}}'s web and pulled over!👥",
       "catch_message": "🕸️You were caught by {{player}}'s web!🔒",
@@ -241,14 +292,14 @@
     "shield_block": {
       "name": "🛡️Magic Shield✨",
       "introduce": "🔒Gain 3 seconds of invincibility, immune to all damage💥",
-      "notice": "⚔️Use it at critical moments to avoid fatal damage!😱",
+      "notice": "🛡️Magic shield is super amazing! Blocks all damage, can save your life at critical moments~✨💕",
       "activated": "✨Magic Shield activated! You are now invincible!🛡️",
       "deactivated": "💫Magic Shield effect ended💨"
     },
     "repairman": {
       "name": "🔧Repairman🛠️",
       "introduce": "⏱️25s cooldown, creates temporary platform under feet, costs 10 HP and adds 5s cooldown per use🩸",
-      "notice": "⚠️Cannot use when HP < 10, adds 5s cooldown each use",
+      "notice": "🔧Repairman is super capable! Can build platforms but costs HP, remember to use wisely~💕",
       "platform_created": "🛠️Platform created!",
       "health_deducted": "🩸Health deducted {{amount}} points",
       "low_health": "⚠️Insufficient health, cannot use!",
@@ -257,7 +308,7 @@
     "magic_hat": {
       "name": "🎩Phantom Magician's Trick Hat✨",
       "introduce": "⏱️10s cooldown, randomly performs 8 magical tricks: heal, damage, summon, teleport, candy rain, ghost helper, shield, speed🎲",
-      "notice": "🎭Each use triggers different effects, full of surprises like a real magic show!",
+      "notice": "🎩Magic hat is super amazing! Each time randomly produces different magical effects, like a real magic show full of surprises~✨💕",
       "activated": "✨Magic effect activated, preparing random tricks...",
       "heal": "🌟Magical healing! Restored {{amount}} HP💚",
       "damage": "💥Magic explosion! Dealt {{amount}} damage💔",
@@ -274,18 +325,22 @@
     "transformation": {
       "name": "💉Serum Injection✨",
       "introduce": "Randomly inject serum to become bat or ghost form, gain special abilities for 8 seconds",
-      "notice": "Serum bat form grants flight and speed boost, serum ghost form grants flight and intangibility (but still takes damage)",
+      "notice": "💉Serum injection is super cool! Can transform into bat or ghost, each form has amazing special abilities~✨🦇👻",
       "activated": "💉Serum injection activated! Preparing transformation...",
       "bat_form": "🦇Injected serum into bat form! Flight enhanced, speed greatly boosted, can become invisible and phase through walls!",
       "ghost_form": "👻Injected serum into ghost form! Flight and intangibility activated!",
       "bat_effect_end": "🦇Bat form ended, serum effect disappeared",
       "ghost_effect_end": "👻Ghost form ended, serum effect disappeared",
-      "completed": "✨Serum injection ended, returned to human form..."
+      "completed": "✨Serum injection ended, returned to human form...",
+      "cannot_use": "❌Cannot use serum injection now!",
+      "bat_collision": "🦇Bat Collision",
+      "bat_hit_by_bat": "💥You were hit by {{player}}'s bat form!",
+      "bat_form_interrupted": "🦇Bat form was interrupted early!"
     },
     "shotgun": {
       "name": "🔫Shotgun🎯",
       "introduce": "🔫Cause an explosion at crosshair location, dealing 2 damage to hit entities!",
-      "notice": "🎯Aim at enemies and shoot, explosion effect shakes the battlefield!",
+      "notice": "🔫Shotgun is super awesome! Aim and shoot enemies, BOOM explosion effect shakes the battlefield! Watch the recoil~💥✨",
       "activated": "🔫Shotgun fired!💥",
       "hit_entity": "🎯Hit enemy for {{damage}} damage!",
       "no_hit": "❌No target hit!",
@@ -296,7 +351,7 @@
     "energy_blast": {
       "name": "💥Energy Blast✨",
       "introduce": "Charge up in place then launch a powerful energy orb, unable to move during charge, deals area explosion damage on hit!",
-      "notice": "Energy Blast requires charging in place, cannot move during charge, but deals lethal area damage on hit! ⚠️Warning: May damage yourself, easy to die instantly!",
+      "notice": "💥Energy blast is super shocking! Needs charging but has huge power, be careful not to blow yourself up~ Find a safe spot!⚡💕",
       "missed": "❌Energy blast missed the target!",
       "hit_multiple": "💥Energy blast hit {{count}} targets!🎯",
       "hit_ground": "💥Energy blast hit the ground, causing explosion effect!💥",
@@ -304,29 +359,20 @@
       "miss_message": "😅 Oops, energy blast didn't hit any targets! Aim better next time~",
       "hit_by_energy_blast": "💥You were hit by {{player}}'s energy blast!",
       "charging": "⚡Charging energy blast..."
+    },
+    "aura_field": {
+      "name": "💫Aura Field✨",
+      "introduce": "Release mysterious aura energy, all entities within 15 blocks take -1 to 1 random damage or healing every 0.1 seconds!",
+      "notice": "Aura field effects are random, may cause damage or healing, lasts 10 seconds, triggers every 0.1 seconds!✨",
+      "activated": "💫Aura Field activated! Starting to affect all surrounding entities~✨",
+      "deactivated": "💫Aura field effect ended, aura slowly dissipates...✨",
+      "hit_by_aura": "💫Oops! Hit by {{player}}'s aura energy, took {{damage}} damage💔",
+      "healed_by_aura": "💚Wow! Healed by {{player}}'s aura energy, restored {{amount}} HP❤️✨"
     }
   },
   "skill.default": "🔄Default Skill🎮",
   "gui.skill_status": "🎮Skill Status📊",
   "tag.about_to_explode": "💥About to explode!⏳",
-
-  "errors": {
-    "bat_explosion": "🦇Bat explosion error💥",
-    "checking_blocks": "❌Checking blocks error🧱",
-    "cleaning_bats": "❌Cleaning bats error🦇",
-    "count_blocks_failed": "❌Counting blocks failed🧱",
-    "tnt_timer": "❌TNT timer error:⏱️",
-    "bat_interval": "❌Bat spawn interval error🦇",
-    "cannot_summon_bat": "❌Cannot summon bat:🦇",
-    "candy_lifetime": "Candy lifetime processing error",
-    "summon_candy": "Error summoning candy",
-    "candy_interaction": "Candy interaction processing error",
-    "candy_detection": "Candy detection error",
-    "cleaning_candies": "Error cleaning candies",
-    "ghost_update": "👻Ghost update error💨",
-    "summon_ghost": "👻Error summoning ghost💨",
-    "ghost_explosion": "👻Ghost explosion error💥"
-  },
 
   "unit": {
     "second": "seconds⏱",
