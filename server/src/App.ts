@@ -740,6 +740,96 @@ async function thousandArrowsEffect(entity) {
   }
 }
 
+// 闪电效果函数 - 随机选择一个玩家造成50点伤害⚡
+async function lightningEffect(entity) {
+  try {
+    // 获取所有在场的玩家
+    const allPlayers = world.querySelectorAll('*').filter((e) => {
+      if (!e.position || e.destroyed || e.isInvincible) return false;
+      // 只影响场内玩家
+      if (e.isPlayer && !PlayerInGame.includes(e.player.name)) return false;
+      return true;
+    });
+
+    if (allPlayers.length === 0) {
+      entity.player.directMessage(i18n.t('skill.lightning.no_target'));
+      return;
+    }
+
+    // 随机选择一个玩家作为目标
+    const targetPlayer =
+      allPlayers[Math.floor(Math.random() * allPlayers.length)];
+    const damageAmount = 50; // 50点伤害
+
+    // 对目标造成伤害
+    targetPlayer.hurt(damageAmount, {
+      attacker: entity,
+      damageType: i18n.t('skill.lightning.name'),
+    });
+
+    // 添加闪电粒子效果 - 蓝白色闪电特效⚡
+    Object.assign(targetPlayer, {
+      particleRate: 150,
+      particleColor: new GameRGBColor(0.8, 0.9, 1.0), // 蓝白色闪电
+      particleLifetime: 1.5,
+      particleSize: [4, 6, 4],
+    });
+
+    // 1.5秒后移除粒子效果
+    setTimeout(() => {
+      if (targetPlayer && !targetPlayer.destroyed) {
+        Object.assign(targetPlayer, {
+          particleRate: 0,
+        });
+      }
+    }, 1500);
+
+    // 为释放者添加闪电特效 - 金色闪电
+    Object.assign(entity, {
+      particleRate: 100,
+      particleColor: new GameRGBColor(1, 0.8, 0.2), // 金黄色闪电
+      particleLifetime: 1.0,
+      particleSize: [3, 4, 3],
+    });
+
+    // 1秒后移除释放者的特效
+    setTimeout(() => {
+      if (!entity.destroyed) {
+        Object.assign(entity, {
+          particleRate: 0,
+        });
+      }
+    }, 1000);
+
+    // 向目标发送被击中消息
+    if (targetPlayer.player && targetPlayer !== entity) {
+      targetPlayer.player.directMessage(
+        i18n.t('skill.lightning.struck_message', {
+          player: entity.player.name,
+        })
+      );
+    }
+
+    // 向释放者发送技能使用消息
+    entity.player.directMessage(
+      i18n.t('skill.lightning.activated', {
+        target: targetPlayer.player ? targetPlayer.player.name : 'Unknown',
+      })
+    );
+
+    // 向所有玩家广播闪电消息
+    world.say(
+      i18n.t('skill.lightning.broadcast_message', {
+        caster: entity.player.name,
+        target: targetPlayer.player ? targetPlayer.player.name : 'Unknown',
+      })
+    );
+  } catch (error) {
+    console.error('闪电效果错误:', error);
+    entity.player.directMessage(i18n.t('skill.lightning.effect_error'));
+  }
+}
+
 // 综合技能效果函数 - 可以被其他技能调用 ✨
 // 使用方法：
 // await applySkillEffect(entity, 'heal', { amount: 70 });
@@ -970,6 +1060,8 @@ async function applySkillEffect(entity, effectType, options = {}) {
       return await magicHatEffect(entity, options.duration || 5000);
     case 'aura_field':
       return await auraFieldEffect(entity, options.duration || 10000);
+    case 'lightning':
+      return await lightningEffect(entity);
     default:
       console.warn(`Unknown skill effect: ${effectType}`);
   }
@@ -2259,6 +2351,16 @@ var skillList = [
     async effect(entity, raycast) {
       // 使用万箭齐发效果函数
       await thousandArrowsEffect(entity);
+    },
+  },
+  {
+    name: i18n.t('skill.lightning.name'),
+    introduce: i18n.t('skill.lightning.introduce'),
+    notice: i18n.t('skill.lightning.notice'),
+    cold: 30000, // 30秒冷却
+    async effect(entity, raycast) {
+      // 使用闪电效果函数
+      await lightningEffect(entity);
     },
   },
 ];

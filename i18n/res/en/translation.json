@@ -394,6 +394,15 @@
       "damaged": "💔{{player}}'s Thousand Arrows dealt {{damage}} damage to you!",
       "hit_count": "🏹Arrow rain hit {{count}} targets!",
       "self_damage": "💔You were hurt by your own arrow rain!"
+    },
+    "lightning": {
+      "name": "⚡Legend of the Three Kingdoms: Lightning✨",
+      "introduce": "⚡Randomly targets one player, dealing 50 damage!",
+      "notice": "⚡Lightning is extremely powerful! Randomly selects an unlucky target for 50 damage, be careful not to strike your teammates!⚡💕",
+      "activated": "⚡Lightning activated! Thunder strikes, random judgment!⚡",
+      "damaged": "💔{{player}}'s Lightning dealt {{damage}} damage to you!",
+      "target_selected": "⚡{{target}} was selected as the lightning target!",
+      "self_target": "⚡Oops! Lightning struck yourself!"
     }
   },
   "skill.default": "🔄Default Skill🎮",
