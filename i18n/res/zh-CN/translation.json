@@ -374,6 +374,22 @@
       "cooldown_decreased": "❄️ 冷却减少",
       "skill_end_summary": "✨ 气场技能结束 - {{summary}}",
       "effect_error": "💫气场发散效果出错✨"
+    },
+    "peach_garden_oath": {
+      "name": "三国杀——🌸桃园结义✨",
+      "introduce": "👥召唤桃园之力，为所有在场玩家恢复20点生命值！",
+      "notice": "💕桃园结义超有爱的！能为所有小伙伴恢复生命值，团队合作必备神技~✨",
+      "activated": "🌸桃园结义激活！兄弟齐心，其利断金！💪",
+      "healed": "💚{{player}}的桃园结义为你恢复了{{amount}}点生命值！"
+    },
+    "thousand_arrows": {
+      "name": "三国杀——🏹万箭齐发✨",
+      "introduce": "💥召唤漫天箭雨，对所有实体造成5点伤害（包括自己）！",
+      "notice": "⚔️万箭齐发是无差别攻击！记得找个安全位置再释放哦~小心别被自己的箭雨伤到！🏹💕",
+      "activated": "🏹万箭齐发激活！箭雨降临，无处可逃！💨",
+      "damaged": "💔{{player}}的万箭齐发对你造成了{{damage}}点伤害！",
+      "hit_count": "🏹箭雨命中{{count}}个目标！",
+      "self_damage": "💔你被自己的箭雨伤到了！"
     }
   },
   "skill.default": "🔄默认技能🎮",

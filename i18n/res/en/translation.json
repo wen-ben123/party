@@ -378,6 +378,22 @@
       "cooldown_decreased": "❄️ Cooldown Decreased",
       "skill_end_summary": "✨ Aura Skill Ended - {{summary}}",
       "effect_error": "💫Aura Field Effect Error✨"
+    },
+    "peach_garden_oath": {
+      "name": "🌸Legend of the Three Kingdoms: Peach Garden Oath✨",
+      "introduce": "👥Summon the power of brotherhood to restore 20 HP to all players present!",
+      "notice": "💕Peach Garden Oath is super heartwarming! Heals all teammates, perfect for team cooperation~✨",
+      "activated": "🌸Peach Garden Oath activated! Brothers united, strength multiplied!💪",
+      "healed": "💚{{player}}'s Peach Garden Oath restored {{amount}} HP for you!"
+    },
+    "thousand_arrows": {
+      "name": "🏹Legend of the Three Kingdoms: Thousand Arrows✨",
+      "introduce": "💥Summon a rain of arrows, dealing 5 damage to all entities (including yourself)!",
+      "notice": "⚔️Thousand Arrows is indiscriminate! Find a safe spot before casting~ Be careful not to hurt yourself with your own arrow rain!🏹💕",
+      "activated": "🏹Thousand Arrows activated! Arrow rain falls, nowhere to escape!💨",
+      "damaged": "💔{{player}}'s Thousand Arrows dealt {{damage}} damage to you!",
+      "hit_count": "🏹Arrow rain hit {{count}} targets!",
+      "self_damage": "💔You were hurt by your own arrow rain!"
     }
   },
   "skill.default": "🔄Default Skill🎮",

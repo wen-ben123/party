@@ -602,6 +602,144 @@ async function magicHatEffect(entity, duration = 5000) {
   return magicHat;
 }
 
+// 桃园结义效果 🍑✨
+async function peachGardenOathEffect(entity) {
+  // 获取所有在场玩家
+  const allPlayers = world
+    .querySelectorAll('player')
+    .filter(
+      (p) => p.player && PlayerInGame.includes(p.player.name) && !p.destroyed
+    );
+
+  // 为每个玩家恢复20点生命值
+  let healedCount = 0;
+  allPlayers.forEach((targetPlayer) => {
+    if (targetPlayer.hp < targetPlayer.maxHp) {
+      targetPlayer.hp = Math.min(targetPlayer.hp + 20, targetPlayer.maxHp);
+      healedCount++;
+
+      // 添加治疗效果粒子特效 💚
+      Object.assign(targetPlayer, {
+        particleRate: 60,
+        particleColor: new GameRGBColor(1, 0.8, 0.2), // 金黄色，象征桃园
+        particleLifetime: 1.0,
+        particleSize: [4, 3, 2, 1],
+      });
+
+      // 0.8秒后移除粒子效果
+      setTimeout(() => {
+        if (targetPlayer && !targetPlayer.destroyed) {
+          Object.assign(targetPlayer, { particleRate: 0 });
+        }
+      }, 800);
+
+      // 发送治疗消息
+      targetPlayer.player.directMessage(
+        i18n.t('skill.peach_garden_oath.heal_message', { amount: 20 })
+      );
+    }
+  });
+
+  // 释放者获得特殊视觉效果 ✨
+  Object.assign(entity, {
+    particleRate: 100,
+    particleColor: new GameRGBColor(1, 0.9, 0.3), // 亮黄色
+    particleLifetime: 1.5,
+    particleSize: [6, 4, 3, 2, 1],
+  });
+
+  setTimeout(() => {
+    if (entity && !entity.destroyed) {
+      Object.assign(entity, { particleRate: 0 });
+    }
+  }, 1500);
+
+  // 发送技能使用消息
+  entity.player.directMessage(
+    i18n.t('skill.peach_garden_oath.effect_message', { count: healedCount })
+  );
+}
+
+// 万箭齐发效果函数 - 全屏AOE伤害技能🏹
+async function thousandArrowsEffect(entity) {
+  try {
+    // 获取所有在场实体（包括玩家和其他实体，但不包括糖果、TNT等）
+    const allEntities = world.querySelectorAll('*').filter((e) => {
+      if (!e.position || e.destroyed || e.isInvincible) return false;
+      // 排除糖果、TNT等非目标实体
+      if (e.hasTag && (e.hasTag('candy') || e.hasTag('TNT'))) return false;
+      if (e.isCandy) return false;
+      // 只影响场内玩家
+      if (e.isPlayer && !PlayerInGame.includes(e.player.name)) return false;
+      return true;
+    });
+
+    let damagedCount = 0;
+    const damageAmount = 5; // 固定5点伤害
+
+    // 对所有实体造成伤害
+    allEntities.forEach((targetEntity) => {
+      // 造成伤害
+      targetEntity.hurt(damageAmount, {
+        attacker: entity,
+        damageType: i18n.t('skill.thousand_arrows.name'),
+      });
+      damagedCount++;
+
+      // 添加箭矢粒子效果 - 银白色箭雨效果
+      Object.assign(targetEntity, {
+        particleRate: 100,
+        particleColor: new GameRGBColor(0.9, 0.9, 0.95), // 银白色
+        particleLifetime: 1.0,
+        particleSize: [2, 3, 2],
+      });
+
+      // 0.8秒后移除粒子效果
+      setTimeout(() => {
+        if (targetEntity && !targetEntity.destroyed) {
+          Object.assign(targetEntity, {
+            particleRate: 0,
+          });
+        }
+      }, 800);
+
+      // 向被攻击的实体发送消息
+      if (targetEntity.player && targetEntity !== entity) {
+        targetEntity.player.directMessage(
+          i18n.t('skill.thousand_arrows.hit_message', {
+            player: entity.player.name,
+          })
+        );
+      }
+    });
+
+    // 为释放者添加特殊箭矢特效 - 金色箭雨
+    Object.assign(entity, {
+      particleRate: 120,
+      particleColor: new GameRGBColor(1, 0.8, 0.2), // 金黄色
+      particleLifetime: 1.5,
+      particleSize: [3, 4, 3],
+    });
+
+    // 1.5秒后移除释放者的特效
+    setTimeout(() => {
+      if (!entity.destroyed) {
+        Object.assign(entity, {
+          particleRate: 0,
+        });
+      }
+    }, 1500);
+
+    // 发送技能使用消息
+    entity.player.directMessage(
+      i18n.t('skill.thousand_arrows.activated', { count: damagedCount })
+    );
+  } catch (error) {
+    console.error('万箭齐发效果错误:', error);
+    entity.player.directMessage(i18n.t('skill.thousand_arrows.effect_error'));
+  }
+}
+
 // 综合技能效果函数 - 可以被其他技能调用 ✨
 // 使用方法：
 // await applySkillEffect(entity, 'heal', { amount: 70 });
@@ -2101,6 +2239,26 @@ var skillList = [
 
       // 结束消息也静默处理，不播报
       // entity.player.directMessage(i18n.t('skill.aura_field.deactivated'));
+    },
+  },
+  {
+    name: i18n.t('skill.peach_garden_oath.name'),
+    introduce: i18n.t('skill.peach_garden_oath.introduce'),
+    notice: i18n.t('skill.peach_garden_oath.notice'),
+    cold: 15000, // 15秒冷却
+    async effect(entity, raycast) {
+      // 使用桃园结义效果函数
+      await peachGardenOathEffect(entity);
+    },
+  },
+  {
+    name: i18n.t('skill.thousand_arrows.name'),
+    introduce: i18n.t('skill.thousand_arrows.introduce'),
+    notice: i18n.t('skill.thousand_arrows.notice'),
+    cold: 20000, // 20秒冷却
+    async effect(entity, raycast) {
+      // 使用万箭齐发效果函数
+      await thousandArrowsEffect(entity);
     },
   },
 ];
