@@ -364,7 +364,7 @@ function explodePlayer(
             );
           }
         } else {
-          console.log('尝试治疗玩家，但hp属性不可用');
+          console.log('治疗玩家出错：hp属性不可用，请检查实体属性设置！💚');
         }
       } else {
         // 正常造成伤害，但检查无敌状态
@@ -735,7 +735,7 @@ async function thousandArrowsEffect(entity) {
       i18n.t('skill.thousand_arrows.activated', { count: damagedCount })
     );
   } catch (error) {
-    console.error('万箭齐发效果错误:', error);
+    console.error('🏹万箭齐发技能效果出错啦！:', error);
     entity.player.directMessage(i18n.t('skill.thousand_arrows.effect_error'));
   }
 }
@@ -825,7 +825,7 @@ async function lightningEffect(entity) {
       })
     );
   } catch (error) {
-    console.error('闪电效果错误:', error);
+    console.error('⚡闪电技能效果出错啦！:', error);
     entity.player.directMessage(i18n.t('skill.lightning.effect_error'));
   }
 }
@@ -1034,7 +1034,7 @@ async function auraFieldEffect(entity, duration = 10000) {
       }
     }, duration);
   } catch (e) {
-    console.warn(i18n.t('skill.aura_field.effect_error'), e);
+    console.warn(i18n.t('skill.aura_field.effect_error'), e); // 光环力场效果错误
   }
 }
 
@@ -1063,7 +1063,7 @@ async function applySkillEffect(entity, effectType, options = {}) {
     case 'lightning':
       return await lightningEffect(entity);
     default:
-      console.warn(`Unknown skill effect: ${effectType}`);
+      console.warn(`💫未知技能效果类型: ${effectType}，请检查技能配置！`);
   }
 }
 
@@ -2667,7 +2667,9 @@ function summonGhost(count = 1) {
 
       // 确保幽灵属性正确初始化
       if (!ghost.hp || !ghost.maxHp) {
-        console.warn('幽灵初始化失败：hp或maxHp属性未正确设置');
+        console.warn(
+          '👻幽灵初始化失败：hp或maxHp属性未正确设置，请检查实体配置！'
+        );
         return;
       }
 
@@ -2727,7 +2729,7 @@ function summonGhost(count = 1) {
             }
           }
         } catch (e) {
-          console.warn('幽灵伤害处理出错', e);
+          console.warn('👻幽灵伤害处理出错啦！', e);
         }
       });
 
@@ -2911,12 +2913,12 @@ function summonGhost(count = 1) {
           // 纯血量机制 - 无需额外生命周期检查 💀
           // 幽灵的生死完全由血量决定，简单可靠！
         } catch (e) {
-          console.warn('幽灵更新出错', e);
+          console.warn('👻幽灵更新出错啦！', e);
         }
       }, 100);
     }
   } catch (e) {
-    console.warn('召唤幽灵出错', e);
+    console.warn('👻召唤幽灵出错啦！', e);
   }
 }
 
@@ -2966,7 +2968,7 @@ async function explodeGhost(ghost, accelerated = false) {
       ghost.destroy();
     }
   } catch (e) {
-    console.warn('幽灵爆炸错误', e);
+    console.warn('👻幽灵爆炸错误啦！', e);
   }
 }
 
@@ -3064,7 +3066,7 @@ function summonBat(count = 1) {
             }
           }
         } catch (e) {
-          console.warn('蝙蝠伤害处理出错', e);
+          console.warn('🦇蝙蝠伤害处理出错啦！', e);
         }
       });
       // 设置随机生存时间（30-60秒）
@@ -3087,7 +3089,7 @@ function summonBat(count = 1) {
           if (bat.lifespanTimer) clearTimeout(bat.lifespanTimer);
           bat.destroy();
         } catch (e) {
-          console.warn('蝙蝠爆炸错误', e);
+          console.warn('🦇蝙蝠爆炸错误啦！', e);
         }
       }, lifespan);
 
@@ -3209,7 +3211,7 @@ function summonBat(count = 1) {
             // 使用与幽灵相同的边界检查函数 🌟
             checkAndBounceBoundary(bat, minX, maxX, minY, maxY, minZ, maxZ);
           } catch (e) {
-            console.warn('蝙蝠边界检测异常:', e);
+            console.warn('🦇蝙蝠边界检测异常:', e);
           }
           // 检查与目标（玩家或替身）的碰撞与追踪行为
           // 先检查所有玩家
@@ -3402,15 +3404,15 @@ function summonBat(count = 1) {
               clearInterval(t);
             }
           } catch (e) {
-            console.warn('蝙蝠方块检测异常:', e);
+            console.warn('🦇蝙蝠方块检测异常啦！:', e);
           }
         } catch (e) {
-          console.warn('蝙蝠移动异常:', e);
+          console.warn('🦇蝙蝠移动异常啦！:', e);
         }
       }, 100);
     }
   } catch (e) {
-    console.error('无法召唤蝙蝠', e);
+    console.error('🦇无法召唤蝙蝠啦！', e);
   }
 }
 
@@ -3432,7 +3434,7 @@ function countBlocks() {
     }
     return cnt;
   } catch (e) {
-    console.warn('计算方块失败', e);
+    console.warn('🧮计算方块失败啦！', e);
     return 0;
   }
 }
@@ -3557,7 +3559,7 @@ async function startGame() {
         await summonTNT();
       }
     } catch (e) {
-      console.warn('TNT计时器错误:', e);
+      console.warn('💣TNT计时器出错啦！:', e);
     }
   }, worldCold * 1000); // 使用worldCold作为间隔（秒转毫秒）
 
@@ -3634,7 +3636,7 @@ async function startGame() {
             if (!worldInGame) return;
             summonTNT();
           } catch (e) {
-            console.warn('TNT计时器错误:', e);
+            console.warn('💣TNT计时器出错啦！:', e);
           }
         }, worldCold * 1000);
       }
@@ -3664,7 +3666,7 @@ async function startGame() {
           return; // 立即返回，避免后续逻辑执行
         }
       } catch (e) {
-        console.warn('检查方块错误', e);
+        console.warn('🟫检查方块错误啦！', e);
       }
     }
     await sleep(1000); // 保持1秒间隔
@@ -3682,12 +3684,12 @@ async function startGame() {
       try {
         if (b && b.destroy) b.destroy();
       } catch (e) {
-        console.warn('清理单个蝙蝠异常:', e);
+        console.warn('🦇清理单个蝙蝠异常啦！:', e);
       }
     });
     activeBats.length = 0;
   } catch (e) {
-    console.warn('清理蝙蝠错误', e);
+    console.warn('🦇清理蝙蝠错误啦！', e);
   }
   world.querySelectorAll('.TNT').forEach(async (i) => i.destroy());
 
@@ -3823,7 +3825,7 @@ setInterval(() => {
               e.hurt(999, { damageType: i18n.t('game.fell_into_void') });
             }
           } catch (error) {
-            console.error('Error in rescue platform:', error);
+            console.error('🚨救援平台出错啦！:', error);
             e.hurt(999, { damageType: i18n.t('game.fell_into_void') });
           }
         } else {
@@ -4025,7 +4027,7 @@ async function gameOver() {
     });
     activeBats.length = 0;
   } catch (e) {
-    console.warn('清理蝙蝠错误', e);
+    console.warn('🦇清理蝙蝠错误啦！', e);
   }
 
   // 销毁所有残留的糖果实体
@@ -4041,7 +4043,7 @@ async function gameOver() {
     });
     activeCandies.length = 0;
   } catch (e) {
-    console.warn('清理糖果错误', e);
+    console.warn('🍬清理糖果错误啦！', e);
   }
 
   // 销毁所有残留的幽灵实体
@@ -4056,7 +4058,7 @@ async function gameOver() {
     });
     activeGhosts.length = 0;
   } catch (e) {
-    console.warn('幽灵更新错误', e);
+    console.warn('👻幽灵更新错误啦！', e);
   }
 
   // 销毁所有TNT实体
@@ -4246,7 +4248,7 @@ function summonCandy() {
           }, 1000);
         }
       } catch (e) {
-        console.warn('启用糖果碰撞体积时出错:', e);
+        console.warn('🍬启用糖果碰撞体积时出错啦！:', e);
       }
     }, enableCollideTime);
 
@@ -4308,7 +4310,7 @@ function summonCandy() {
           }
         }
       } catch (e) {
-        console.warn('糖果边界检查时出错:', e);
+        console.warn('🍬糖果边界检查时出错啦！:', e);
       }
     }, 1000); // 每1秒检查一次边界（更频繁）
 
@@ -4328,13 +4330,13 @@ function summonCandy() {
           }
         }
       } catch (e) {
-        console.warn('糖果生命周期处理出错', e);
+        console.warn('🍬糖果生命周期处理出错啦！', e);
       }
     }, CANDY_LIFETIME);
 
     // 不再使用闪烁效果，保持稳定外观
   } catch (e) {
-    console.error('生成糖果出错', e);
+    console.error('🍬生成糖果出错啦！', e);
   }
 }
 
@@ -4481,7 +4483,7 @@ async function handleCandyInteraction(player, candy) {
         break;
     }
   } catch (e) {
-    console.error('糖果交互处理出错', e);
+    console.error('🍬糖果交互处理出错啦！', e);
   }
 }
 
@@ -4501,7 +4503,7 @@ world.onInteract(async ({ entity, targetEntity }) => {
       }
     }
   } catch (e) {
-    console.error('糖果交互处理出错', e);
+    console.error('🍬糖果交互处理出错啦！', e);
   }
 });
 
