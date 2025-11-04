@@ -92,7 +92,7 @@
     "last_game_player_survival_time": "⏱️生存时间：{{seconds}}秒",
     "last_game_player_damage_taken": "💥承受伤害：{{damage}}",
     "last_game_player_damage_dealt": "⚔️造成伤害：{{damage}}",
-    "last_game_player_heals": "💚治疗次数：{{count}}",
+    "last_game_player_heal_amount": "💚治疗数值：{{amount}}",
     "last_game_player_skills": "🎮技能使用：{{count}}次",
     "last_game_player_bats_killed": "🦇击杀蝙蝠：{{count}}只",
     "last_game_player_ghosts_killed": "👻击杀幽灵：{{count}}个",

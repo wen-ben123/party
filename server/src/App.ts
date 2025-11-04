@@ -323,13 +323,14 @@ function explodeSingleVoxel(position) {
   }
 }
 
-//摧毁玩家
+//摧毁所有实体（通用爆炸影响系统）💥
 function explodePlayer(
   position,
   isGhostExplosion = false,
   attacker = null,
   damageType = null
 ) {
+  // 影响所有玩家
   for (const k of world.querySelectorAll('player')) {
     if (k.position.distance(position) <= 8) {
       const damageAmount = Math.round(12 / k.position.distance(position));
@@ -348,6 +349,7 @@ function explodePlayer(
           if (playerStatsMap.has(k.player.name)) {
             const stats = playerStatsMap.get(k.player.name)!;
             stats.healsReceived += 1;
+            stats.healAmountReceived += healAmount; // 记录治疗数值 💚
           }
 
           // 显示治疗效果 - 只播报给玩家和世界 🌟
@@ -391,11 +393,9 @@ function explodePlayer(
     }
   }
 
-  // 蝙蝠和幽灵互相影响机制 🦇👻
-  // 1. 爆炸会影响蝙蝠（蝙蝠会被炸死）
+  // 影响所有活跃蝙蝠 🦇 - 只造成伤害，不直接击杀
   for (const bat of activeBats) {
     if (bat && !bat.destroyed && bat.position.distance(position) <= 8) {
-      // 蝙蝠被爆炸炸死
       const damageAmount = Math.round(15 / bat.position.distance(position));
 
       // 添加爆炸视觉效果
@@ -406,39 +406,26 @@ function explodePlayer(
         particleSize: [6, 4, 2, 1],
       });
 
-      // 延迟销毁蝙蝠，让玩家看到效果
-      setTimeout(() => {
-        if (bat && !bat.destroyed) {
-          // 清除相关定时器
-          if (bat.movementTimer) clearInterval(bat.movementTimer);
-          if (bat.lifespanTimer) clearTimeout(bat.lifespanTimer);
-          bat.destroy();
-
-          // 从活跃列表中移除
-          const batIndex = activeBats.indexOf(bat);
-          if (batIndex > -1) {
-            activeBats.splice(batIndex, 1);
-          }
-        }
-      }, 300);
+      // 使用hurt方法让蝙蝠自己处理伤害和击杀记录
+      bat.hurt(damageAmount, {
+        damageType: i18n.t('damage.explosion'),
+        source: attacker,
+      });
 
       break; // 避免重复处理
     }
   }
 
-  // 2. 爆炸会影响幽灵（幽灵会被加速爆炸）
+  // 影响所有活跃幽灵 👻 - 只造成伤害，不直接引爆
   for (const ghost of activeGhosts) {
     if (ghost && !ghost.destroyed && ghost.position.distance(position) <= 8) {
-      // 幽灵被爆炸加速引爆
-      const ghostIndex = activeGhosts.indexOf(ghost);
-      if (ghostIndex > -1) {
-        // 立即触发幽灵的加速爆炸
-        setTimeout(async () => {
-          if (ghost && !ghost.destroyed) {
-            await explodeGhost(ghost, true); // true表示加速爆炸
-          }
-        }, 100);
-      }
+      const damageAmount = Math.round(12 / ghost.position.distance(position));
+
+      // 使用hurt方法让幽灵自己处理伤害和爆炸
+      ghost.hurt(damageAmount, {
+        damageType: i18n.t('damage.explosion'),
+        source: attacker,
+      });
 
       break; // 避免重复处理
     }
@@ -458,6 +445,7 @@ async function healEffect(entity, amount = 70, damageType = null) {
   if (playerStatsMap.has(entity.player.name)) {
     const stats = playerStatsMap.get(entity.player.name)!;
     stats.healsReceived += 1;
+    stats.healAmountReceived += amount; // 记录治疗数值 💚
   }
 
   // 治疗类型为气场时不播报 💨
@@ -467,9 +455,12 @@ async function healEffect(entity, amount = 70, damageType = null) {
 }
 
 // 伤害技能效果 💥
-async function damageEffect(entity, amount = 30) {
+async function damageEffect(entity, amount = 30, attacker = null) {
   if (entity.hurt && !entity.isInvincible) {
-    entity.hurt(amount, { damageType: i18n.t('damage.magic') });
+    entity.hurt(amount, {
+      damageType: i18n.t('damage.magic'),
+      source: attacker,
+    });
     // 记录伤害数据 📊
     recordDamageDealt(entity, amount);
 
@@ -618,6 +609,12 @@ async function peachGardenOathEffect(entity) {
       targetPlayer.hp = Math.min(targetPlayer.hp + 20, targetPlayer.maxHp);
       healedCount++;
 
+      // 记录治疗数值数据 💚
+      if (playerStatsMap.has(targetPlayer.player.name)) {
+        const stats = playerStatsMap.get(targetPlayer.player.name)!;
+        stats.healAmountReceived += 20; // 记录桃园结义治疗数值
+      }
+
       // 添加治疗效果粒子特效 💚
       Object.assign(targetPlayer, {
         particleRate: 60,
@@ -684,6 +681,8 @@ async function thousandArrowsEffect(entity) {
         attacker: entity,
         damageType: i18n.t('skill.thousand_arrows.name'),
       });
+      // 记录伤害数据 📊
+      recordDamageDealt(entity, damageAmount);
       damagedCount++;
 
       // 添加箭矢粒子效果 - 银白色箭雨效果
@@ -766,6 +765,8 @@ async function lightningEffect(entity) {
       attacker: entity,
       damageType: i18n.t('skill.lightning.name'),
     });
+    // 记录伤害数据 📊
+    recordDamageDealt(entity, damageAmount);
 
     // 添加闪电粒子效果 - 蓝白色闪电特效⚡
     Object.assign(targetPlayer, {
@@ -933,6 +934,12 @@ async function auraFieldEffect(entity, duration = 10000) {
           }
           totalHeals += healAmount;
 
+          // 记录光环治疗数值 💚
+          if (playerStatsMap.has(targetEntity.player.name)) {
+            const stats = playerStatsMap.get(targetEntity.player.name)!;
+            stats.healAmountReceived += healAmount;
+          }
+
           // 治疗视觉效果 - 绿色粒子（受距离影响调整颜色强度）
           const intensity = Math.min(1, distanceFactor + 0.3);
           Object.assign(targetEntity, {
@@ -1043,7 +1050,11 @@ async function applySkillEffect(entity, effectType, options = {}) {
     case 'heal':
       return await healEffect(entity, options.amount || 70);
     case 'damage':
-      return await damageEffect(entity, options.amount || 30);
+      return await damageEffect(
+        entity,
+        options.amount || 30,
+        options.attacker || null
+      );
     case 'shield':
       return await shieldEffect(entity, options.duration || 1500);
     case 'speed':
@@ -1446,6 +1457,8 @@ var skillList = [
           // 💥 对击中的玩家造成伤害
           if (raycast.hitEntity.hp !== undefined) {
             raycast.hitEntity.hp -= 2;
+            // 记录伤害数据 📊
+            recordDamageDealt(entity, 2);
             raycast.hitEntity.player.directMessage(
               i18n.t('skill.dash.hit_damage', {
                 player: entity.player.name,
@@ -1820,6 +1833,7 @@ var skillList = [
           const damageAmount = 15 + Math.random() * 10;
           await applySkillEffect(entity, 'damage', {
             amount: Math.floor(damageAmount),
+            attacker: entity,
           });
           break;
 
@@ -2613,11 +2627,14 @@ interface PlayerGameStats {
   damageTaken: number; // 受到的总伤害
   damageDealt: number; // 造成的总伤害
   healsReceived: number; // 受到的治疗次数
+  healAmountReceived: number; // 受到的治疗数值 💚
   candiesCollected: number; // 收集糖果数
   finalHp: number; // 最终血量
   maxHp: number; // 最大血量
   deathType?: string; // 死亡原因
   isWinner: boolean; // 是否获胜
+  batsKilled: number; // 击杀蝙蝠数 🦇
+  ghostsKilled: number; // 击杀幽灵数 👻
 }
 
 // 游戏数据存储
@@ -2721,11 +2738,17 @@ function summonGhost(count = 1) {
             await sleep(200);
 
             // 执行爆炸
-            await explodeGhost(ghost, true); // 加速爆炸
+            await explodeGhost(ghost, true, source); // 加速爆炸，传递攻击者
 
-            // 如果伤害来源是玩家，发送击杀消息
+            // 如果伤害来源是玩家，发送击杀消息并记录击杀数
             if (source && source.player) {
-              source.player.directMessage(i18n.t('game.ghost_killed'));
+              // 记录幽灵击杀数 📊
+              if (playerStatsMap.has(source.player.name)) {
+                const stats = playerStatsMap.get(source.player.name)!;
+                stats.ghostsKilled += 1;
+              }
+
+              // 不再显示击杀消息 🚫💬
             }
           }
         } catch (e) {
@@ -2789,7 +2812,7 @@ function summonGhost(count = 1) {
             // 如果血量归零，立即爆炸（随机机制让每次体验都不同！）
             if (ghost.hp <= 0) {
               clearInterval(ghostInterval);
-              await explodeGhost(ghost, true); // 加速爆炸
+              await explodeGhost(ghost, true, null); // 加速爆炸，无攻击者（自然死亡）
               return;
             }
           }
@@ -2874,7 +2897,7 @@ function summonGhost(count = 1) {
 
                 // 幽灵被碰撞后加速爆炸
                 clearInterval(ghostInterval);
-                await explodeGhost(ghost, true); // 传入true表示加速爆炸
+                await explodeGhost(ghost, true, player); // 传入true表示加速爆炸，玩家是攻击者
                 return;
               }
             }
@@ -2923,7 +2946,7 @@ function summonGhost(count = 1) {
 }
 
 // 幽灵爆炸函数
-async function explodeGhost(ghost, accelerated = false) {
+async function explodeGhost(ghost, accelerated = false, attacker = null) {
   try {
     if (!ghost || ghost.destroyed) return;
 
@@ -2949,7 +2972,7 @@ async function explodeGhost(ghost, accelerated = false) {
 
     // 执行爆炸效果，传递isGhostExplosion参数以启用概率治疗功能
     explodeVoxel(ghost.position);
-    explodePlayer(ghost.position, true, ghost); // true表示这是幽灵爆炸，ghost是攻击者
+    explodePlayer(ghost.position, true, attacker || ghost); // true表示这是幽灵爆炸，优先使用攻击者，否则使用幽灵自身作为攻击者
 
     // 从活跃列表中移除
     const index = activeGhosts.indexOf(ghost);
@@ -3055,14 +3078,15 @@ function summonBat(count = 1) {
               activeBats.splice(batIndex, 1);
             }
 
-            // 如果伤害来源是玩家，发送击杀消息
+            // 如果伤害来源是玩家，发送击杀消息并记录击杀数
             if (source && source.player) {
-              // 如果伤害类型是气场，就不播报 🌟
-              if (damageType === i18n.t('skill.aura_field.name')) {
-                // 静默处理，不播报击杀消息
-              } else {
-                source.player.directMessage(i18n.t('game.bat_killed'));
+              // 记录蝙蝠击杀数 📊
+              if (playerStatsMap.has(source.player.name)) {
+                const stats = playerStatsMap.get(source.player.name)!;
+                stats.batsKilled += 1;
               }
+
+              // 不再显示击杀消息 🚫💬
             }
           }
         } catch (e) {
@@ -3481,12 +3505,15 @@ async function startGame() {
         survivalTime: 0,
         damageTaken: 0,
         damageDealt: 0,
+        healAmountReceived: 0, // 初始化治疗数值 💚
         healsReceived: 0,
         candiesCollected: 0,
         finalHp: 100,
         maxHp: 100,
         deathType: undefined,
         isWinner: false,
+        batsKilled: 0, // 初始化蝙蝠击杀数 🦇
+        ghostsKilled: 0, // 初始化幽灵击杀数 👻
       });
     }
   });
@@ -4126,7 +4153,7 @@ async function showLastGameDataDialog(player: any) {
     i18n.t('gui.last_game_ghost_count', { count: stats.ghostCount }) + '\n';
   content +=
     i18n.t('gui.last_game_candy_count', { count: stats.candyCount }) + '\n';
-  const blocksDestroyed = 10625 - countBlocks();
+  const blocksDestroyed = 10265 - countBlocks();
   content +=
     i18n.t('gui.last_game_blocks_destroyed', { count: blocksDestroyed }) +
     '\n\n';
@@ -4153,14 +4180,16 @@ async function showLastGameDataDialog(player: any) {
         i18n.t('gui.last_game_player_damage_dealt', {
           damage: playerStats.damageDealt,
         }) + '\n';
+
       content +=
-        i18n.t('gui.last_game_player_heals', {
-          count: playerStats.healsReceived,
+        i18n.t('gui.last_game_player_heal_amount', {
+          amount: playerStats.healAmountReceived,
         }) + '\n';
       content +=
         i18n.t('gui.last_game_player_candies', {
           count: playerStats.candiesCollected,
         }) + '\n';
+      // 不再显示击杀蝙蝠和幽灵统计 🚫🦇👻
       if (playerStats.deathType) {
         content +=
           i18n.t('gui.last_game_player_death_type', {

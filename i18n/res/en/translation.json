@@ -92,7 +92,7 @@
     "last_game_player_survival_time": "⏱️Survival Time: {{seconds}}s",
     "last_game_player_damage_taken": "💥Damage Taken: {{damage}}",
     "last_game_player_damage_dealt": "⚔️Damage Dealt: {{damage}}",
-    "last_game_player_heals": "💚Heals: {{count}}",
+    "last_game_player_heal_amount": "💚Heal Amount: {{amount}}",
     "last_game_player_skills": "🎮Skills Used: {{count}}",
     "last_game_player_bats_killed": "🦇Bats Killed: {{count}}",
     "last_game_player_ghosts_killed": "👻Ghosts Killed: {{count}}",
