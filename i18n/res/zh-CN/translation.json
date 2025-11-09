@@ -29,6 +29,8 @@
     "tnt_explosion": "💣TNT爆炸💥",
     "ghost_explosion": "👻幽灵爆炸💥",
     "bat_impact": "🦇被蝙蝠击中💥",
+    "player_collision": "在玩家中碰撞💥",
+    "entity_collision": "与实体碰撞💥",
     "fell_void": "💥被TNT炸入虚空🌌",
     "blown_into_void": "💥被TNT炸入虚空🌌",
     "ghost_healing": "👻怨灵波及 💕",
@@ -187,7 +189,6 @@
   "skill_used": "🎮你使用了{{skill}}技能！✨",
   "game_start_countdown": "⏱️游戏将在{{countdown}}秒后开始！当前参与者：{{count}}个玩家{{mode}}👤",
   "game_status": "⏱️游戏时间：{{minutes}}分{{seconds}}秒 | 剩余：{{players}}个玩家 | 剩余方块：{{blocks}} | [{{skill}}] {{status}}🎮",
-
   "error": {
     "unsupported_element_type": "❌不支持的元素类型: {{type}}🔧",
     "heal_player_hp_unavailable": "尝试治疗玩家，但hp属性不可用",

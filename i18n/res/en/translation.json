@@ -29,6 +29,8 @@
     "tnt_explosion": "💣TNT Explosion💥",
     "ghost_explosion": "👻Ghost Explosion💥",
     "bat_impact": "🦇Hit by Bat💥",
+    "player_collision": "Player collision💥",
+    "entity_collision": "Entity collision💥",
     "fell_void": "💥Blown into void by TNT🌌",
     "blown_into_void": "💥Blown into void by TNT🌌",
     "ghost_healing": "👻Ghost Explosion 💕",

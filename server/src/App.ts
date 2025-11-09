@@ -2894,11 +2894,6 @@ function summonGhost(count = 1) {
 
                 // 给玩家发送消息
                 player.player.directMessage(i18n.t('entity.ghost.bounced'));
-
-                // 幽灵被碰撞后加速爆炸
-                clearInterval(ghostInterval);
-                await explodeGhost(ghost, true, player); // 传入true表示加速爆炸，玩家是攻击者
-                return;
               }
             }
           }
@@ -2944,7 +2939,6 @@ function summonGhost(count = 1) {
     console.warn('👻召唤幽灵出错啦！', e);
   }
 }
-
 // 幽灵爆炸函数
 async function explodeGhost(ghost, accelerated = false, attacker = null) {
   try {
@@ -3620,6 +3614,9 @@ async function startGame() {
     }
   }, 25000);
 
+  // 启动AI生成器（40-60秒随机生成AI）🤖
+  startAISpawner();
+
   // 重置胜利状态
   isVictory = false;
 
@@ -3959,6 +3956,13 @@ world.onPlayerJoin(async ({ entity }) => {
         damageType: damageType || i18n.t('damage.unknown'),
       })
     );
+
+    // 记录玩家死亡原因
+    if (playerStatsMap.has(entity.player.name)) {
+      const stats = playerStatsMap.get(entity.player.name)!;
+      stats.deathType = damageType || i18n.t('damage.unknown');
+    }
+
     if (PlayerInGame.includes(entity.player.name)) {
       PlayerInGame.splice(PlayerInGame.indexOf(entity.player.name), 1);
       if (PlayerInGame.length > 0) {
@@ -4093,6 +4097,9 @@ async function gameOver() {
 
   // 重置游戏状态
   worldInGame = false;
+
+  // 停止AI生成器
+  stopAISpawner();
 
   // 重置所有玩家状态
   world.querySelectorAll('player').forEach(async (e) => {
@@ -4369,6 +4376,317 @@ function summonCandy() {
   }
 }
 
+// AI发射TNT功能 🤖💥
+let aiSpawnTimer: NodeJS.Timeout | null = null;
+
+// 启动AI生成器
+function startAISpawner() {
+  const spawnAI = () => {
+    if (!worldInGame) return;
+
+    try {
+      // 生成随机位置（在游戏区域内）
+      // 生成随机位置（在游戏区域内，与玩家活动范围一致）
+      const minBound = 40;
+      const maxBound = 80;
+      const x = Math.floor(minBound + Math.random() * (maxBound - minBound));
+      const z = Math.floor(minBound + Math.random() * (maxBound - minBound));
+      const y = 50; // AI生成高度降低到50，与玩家活动范围一致
+
+      // 创建AI实体
+      const ai = world.createEntity({
+        mesh: 'mesh/AI.vb', // AI模型
+        meshScale: [0.06, 0.06, 0.06],
+        position: new GameVector3(x, y, z),
+        collides: true,
+        gravity: true, // 给AI添加重力 🤖
+        fixed: false,
+      });
+
+      ai.addTag('ai');
+      ai.enableDamage = true; // 开启AI伤害接收 🤖
+      ai.hp = 25; // AI当前生命值
+      ai.maxHp = 25; // AI最大生命值
+
+      // AI伤害接收处理 - 仿照蝙蝠实现 🤖💥
+      ai.onTakeDamage(async ({ damage, damageType, source }) => {
+        try {
+          if (!ai || ai.destroyed) return;
+
+          // 减少生命值，AI受到1.5到2倍伤害
+          const damageMultiplier = 1.5 + Math.random() * 0.5; // 1.5到2之间的随机倍数
+          const actualDamage = damage * damageMultiplier;
+          ai.hp -= actualDamage;
+
+          // 添加受伤粒子效果
+          Object.assign(ai, {
+            particleRate: 100,
+            particleColor: new GameRGBColor(1, 0.3, 0.3), // 红色受伤粒子
+            particleLifetime: 0.3,
+            particleSize: [4, 3, 2, 1],
+          });
+
+          // 1秒后恢复正常粒子效果
+          setTimeout(() => {
+            if (!ai || ai.destroyed) return;
+            if (ai.hp > 0) {
+              Object.assign(ai, {
+                particleRate: 0, // 清除粒子效果
+              });
+            }
+          }, 1000);
+
+          // 如果生命值归零，AI爆炸
+          if (ai.hp <= 0) {
+            // 爆炸前的警告效果
+            ai.addTag(i18n.t('entity.ai.self_destruct'));
+
+            // 短暂延迟后自爆
+            await sleep(300);
+
+            // 执行自爆
+            explodeVoxel(ai.position);
+
+            // 清除所有相关定时器并销毁AI
+            if (ai.tntInterval) clearInterval(ai.tntInterval);
+            if (ai.lifespanTimer) clearTimeout(ai.lifespanTimer);
+            if (ai.movementTimer) clearInterval(ai.movementTimer);
+            ai.destroy();
+
+            // 如果伤害来源是玩家，发送击杀消息并记录击杀数
+            if (source && source.player) {
+              // 记录AI击杀数 📊
+              if (playerStatsMap.has(source.player.name)) {
+                const stats = playerStatsMap.get(source.player.name)!;
+                stats.aiKilled += 1;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('🤖AI伤害处理出错啦！', e);
+        }
+      });
+
+      // AI索敌逻辑 - 仿照蝙蝠和幽灵实现 🎯
+      const findNearestTarget = () => {
+        let nearestTarget = null;
+        let nearestDistance = Infinity;
+
+        // 查找最近的非观战玩家
+        const players = world.querySelectorAll('player');
+        for (const player of players) {
+          if (
+            !player.player.spectator &&
+            player.position &&
+            player.position.distance
+          ) {
+            const distance = ai.position.distance(player.position);
+            if (distance < nearestDistance && distance <= 30) {
+              // 30格索敌范围
+              nearestDistance = distance;
+              nearestTarget = player;
+            }
+          }
+        }
+
+        return { target: nearestTarget, distance: nearestDistance };
+      };
+
+      // AI移动逻辑 - 每100ms更新一次
+      const movementInterval = setInterval(() => {
+        try {
+          if (!ai || ai.destroyed) {
+            clearInterval(movementInterval);
+            return;
+          }
+
+          // 查找最近目标
+          const { target, distance } = findNearestTarget();
+
+          // 使用抽象函数实现目标追逐
+          if (target && distance <= 30) {
+            // 追逐目标 - 使用抽象函数
+            chaseTarget(ai, [target], 0.8);
+          }
+
+          // 限制速度 - 使用抽象函数
+          limitSpeed(ai, 0.8);
+
+          // 边界检查与反弹 - 使用抽象函数
+          const minX = 39, // 宽限1格，原40→39
+            maxX = 81; // 宽限1格，原80→81
+          const minZ = 39, // 宽限1格，原40→39
+            maxZ = 81; // 宽限1格，原80→81
+          const minY = 10,
+            maxY = 60; // AI活动范围与玩家一致：y 10-60
+          checkAndBounceBoundary(ai, minX, maxX, minY, maxY, minZ, maxZ);
+        } catch (e) {
+          console.warn('🤖AI移动逻辑出错啦！', e);
+        }
+      }, 100);
+
+      // 保存移动定时器引用
+      ai.movementTimer = movementInterval;
+
+      // AI发射TNT逻辑 - 使用索敌函数找到最近目标
+      const shootTNT = async () => {
+        try {
+          if (!ai || ai.destroyed) return;
+
+          // 使用索敌函数找到最近目标
+          const { target: nearestPlayer, distance } = findNearestTarget();
+
+          if (!nearestPlayer || distance > 30) {
+            return; // 没有目标或目标太远，不发射
+          }
+          if (ai.destroyed) return;
+
+          // 计算方向向量
+          const dx = nearestPlayer.position.x - ai.position.x;
+          const dy = nearestPlayer.position.y - ai.position.y;
+          const dz = nearestPlayer.position.z - ai.position.z;
+          const targetDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+          // 归一化方向向量
+          const face = new GameVector3(
+            dx / targetDistance,
+            dy / targetDistance,
+            dz / targetDistance
+          );
+
+          // 创建TNT
+          const tnt = world.createEntity({
+            mesh: 'mesh/TNT.vb',
+            meshScale: [0.12, 0.12, 0.12],
+            meshEmissive: 0,
+            fixed: false,
+            collides: true,
+            gravity: true,
+            position: new GameVector3(
+              ai.position.x,
+              ai.position.y + 1,
+              ai.position.z
+            ), // AI头顶发射
+            velocity: new GameVector3(face.x * 0.3, face.y * 0.3, face.z * 0.3), // TNT飞行速度
+          });
+          tnt.addTag('TNT');
+          // 🧨 添加边界检查定时器，每2秒检查一次位置
+          tnt.boundaryCheckTimer = setInterval(() => {
+            const pos = tnt.position;
+            // 如果超出边界（0-100），移动到安全区域
+            if (pos.x < 0 || pos.x > 100 || pos.z < 0 || pos.z > 100) {
+              // 移动到安全区域（5-95之间）
+              const safeX = 5 + Math.random() * 90;
+              const safeZ = 5 + Math.random() * 90;
+              tnt.position.set(safeX, pos.y, safeZ);
+
+              // 添加警告粒子效果 💥
+              tnt.particleRate = 30;
+              tnt.particleColor = new GameRGBColor(1, 0.5, 0); // 橙色警告
+
+              // 1秒后恢复原粒子状态
+              setTimeout(() => {
+                tnt.particleRate = 0;
+              }, 1000);
+            }
+          }, 2000);
+
+          // 简化闪烁效果
+          tnt.int = setInterval(() => {
+            tnt.meshEmissive = tnt.meshEmissive === 0 ? 0.5 : 0;
+          }, 1000);
+
+          // 简化爆炸逻辑
+          tnt.onVoxelContact(async () => {
+            if (tnt.boom) return;
+            tnt.boom = true;
+            tnt.addTag(i18n.t('tag.about_to_explode'));
+            await sleep(2000);
+
+            // 简化放大动画
+            for (let i = 0; i < 15; i++) {
+              tnt.meshScale.x += 0.003;
+              tnt.meshScale.y += 0.003;
+              tnt.meshScale.z += 0.003;
+              await sleep(15);
+            }
+
+            // 执行爆炸
+            explodeVoxel(tnt.position);
+            explodePlayer(tnt.position, false, ai); // 传入AI作为攻击者
+
+            // 清理边界检查定时器 🧨
+            if (tnt.boundaryCheckTimer) {
+              clearInterval(tnt.boundaryCheckTimer);
+            }
+
+            tnt.destroy();
+          });
+
+          // TNT接触地面立即爆炸
+          tnt.onEntityContact(({ other }) => {
+            if (other !== ai && !other.hasTag('TNT')) {
+              // 清理所有定时器
+              if (tnt.boundaryCheckTimer) {
+                clearInterval(tnt.boundaryCheckTimer);
+              }
+              if (tnt.int) {
+                clearInterval(tnt.int);
+              }
+
+              // 立即爆炸
+              if (!tnt.boom) {
+                tnt.boom = true;
+                tnt.addTag(i18n.t('tag.about_to_explode'));
+
+                // 执行爆炸
+                explodeVoxel(tnt.position);
+                explodePlayer(tnt.position, false, ai); // 传入AI作为攻击者
+                tnt.destroy();
+              }
+            }
+          });
+        } catch (e) {
+          console.warn('🤖AI发射TNT出错啦！', e);
+        }
+      };
+
+      // 每5秒发射一次TNT
+      ai.tntInterval = setInterval(shootTNT, 5000);
+
+      // AI生命周期（60秒后自动销毁）
+      ai.lifespanTimer = setTimeout(() => {
+        if (!ai.destroyed) {
+          if (ai.tntInterval) {
+            clearInterval(ai.tntInterval);
+          }
+          if (ai.movementTimer) {
+            clearInterval(ai.movementTimer);
+          }
+          ai.destroy();
+        }
+      }, 60000);
+    } catch (e) {
+      console.error('🤖生成AI出错啦！', e);
+    }
+
+    // 设置下次生成时间（40-60秒随机）
+    const nextSpawnTime = 40000 + Math.random() * 20000; // 40-60秒
+    aiSpawnTimer = setTimeout(spawnAI, nextSpawnTime);
+  };
+
+  // 首次生成（10秒后开始）
+  aiSpawnTimer = setTimeout(spawnAI, 10000);
+}
+
+// 停止AI生成器
+function stopAISpawner() {
+  if (aiSpawnTimer) {
+    clearTimeout(aiSpawnTimer);
+    aiSpawnTimer = null;
+  }
+}
+
 // 处理糖果交互
 async function handleCandyInteraction(player, candy) {
   try {
@@ -4535,6 +4853,143 @@ world.onInteract(async ({ entity, targetEntity }) => {
     console.error('🍬糖果交互处理出错啦！', e);
   }
 });
+
+// 玩家碰撞检测 - 实现玩家可以触碰除蝙蝠和凋落物以外任意实体并互相扣0到5血
+setInterval(() => {
+  if (!worldInGame) return;
+
+  const players = world
+    .querySelectorAll('player')
+    .filter((p) => PlayerInGame.includes(p.player.name) && !p.player.spectator);
+
+  // 检查玩家之间的碰撞
+  for (let i = 0; i < players.length; i++) {
+    for (let j = i + 1; j < players.length; j++) {
+      const player1 = players[i];
+      const player2 = players[j];
+
+      if (player1.position && player2.position) {
+        const distance = player1.position.distance(player2.position);
+        // 玩家间碰撞距离设为2格
+        if (distance <= 2.0) {
+          // 玩家互相造成0到5点伤害
+          const damage = Math.floor(Math.random() * 6); // 0-5随机伤害
+
+          if (damage > 0) {
+            // 给玩家1造成伤害
+            if (player1.hurt && !player1.isInvincible) {
+              player1.hurt(damage, {
+                damageType: i18n.t('damage.player_collision'),
+                source: player2,
+              });
+            }
+
+            // 给玩家2造成伤害
+            if (player2.hurt && !player2.isInvincible) {
+              player2.hurt(damage, {
+                damageType: i18n.t('damage.player_collision'),
+                source: player1,
+              });
+            }
+
+            // 添加碰撞粒子效果
+            Object.assign(player1, {
+              particleRate: 50,
+              particleColor: new GameRGBColor(1, 0, 0),
+              particleLifetime: 0.5,
+              particleSize: [3, 2, 1],
+            });
+
+            Object.assign(player2, {
+              particleRate: 50,
+              particleColor: new GameRGBColor(1, 0, 0),
+              particleLifetime: 0.5,
+              particleSize: [3, 2, 1],
+            });
+
+            // 1秒后清除粒子效果
+            setTimeout(() => {
+              if (player1 && !player1.destroyed) {
+                Object.assign(player1, { particleRate: 0 });
+              }
+              if (player2 && !player2.destroyed) {
+                Object.assign(player2, { particleRate: 0 });
+              }
+            }, 1000);
+          }
+        }
+      }
+    }
+  }
+
+  // 检查玩家与其他实体的碰撞 (排除蝙蝠、糖果和TNT)
+  players.forEach((player) => {
+    const allEntities = world
+      .querySelectorAll('*')
+      .filter(
+        (entity) =>
+          entity !== player &&
+          !entity.hasTag('bat') &&
+          !entity.isCandy &&
+          !entity.hasTag('tnt')
+      );
+
+    allEntities.forEach((entity) => {
+      if (player.position && entity.position) {
+        const distance = player.position.distance(entity.position);
+        if (distance <= 2.0) {
+          // 玩家主动碰撞：伤害改为0-2，1-2倍随机倍数
+          const baseDamage = Math.floor(Math.random() * 3); // 0-2基础伤害
+          const multiplier = Math.random() < 0.5 ? 1 : 2; // 50%概率1倍或2倍
+          const finalDamage = baseDamage * multiplier;
+
+          if (finalDamage > 0) {
+            // 给玩家造成伤害
+            if (player.hurt && !player.isInvincible) {
+              player.hurt(damage, {
+                damageType: i18n.t('damage.entity_collision'),
+                source: entity,
+              });
+            }
+
+            // 给实体造成伤害 (如果实体支持伤害)
+            if (entity.hurt && entity.enableDamage) {
+              entity.hurt(damage, {
+                damageType: i18n.t('damage.entity_collision'),
+                source: player,
+              });
+            }
+
+            // 添加碰撞粒子效果
+            Object.assign(player, {
+              particleRate: 50,
+              particleColor: new GameRGBColor(1, 1, 0),
+              particleLifetime: 0.5,
+              particleSize: [3, 2, 1],
+            });
+
+            Object.assign(entity, {
+              particleRate: 50,
+              particleColor: new GameRGBColor(1, 1, 0),
+              particleLifetime: 0.5,
+              particleSize: [3, 2, 1],
+            });
+
+            // 1秒后清除粒子效果
+            setTimeout(() => {
+              if (player && !player.destroyed) {
+                Object.assign(player, { particleRate: 0 });
+              }
+              if (entity && !entity.destroyed) {
+                Object.assign(entity, { particleRate: 0 });
+              }
+            }, 1000);
+          }
+        }
+      }
+    });
+  });
+}, 1000); // 每200毫秒检测一次碰撞
 
 //运行代码
 // 直接调用reset()，它现在包含了清空世界和创建平台的功能
