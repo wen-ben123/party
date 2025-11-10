@@ -102,7 +102,7 @@
     "last_game_player_death_type": "💀Death Type: {{type}}",
     "last_game_player_won": "🏆Won✨",
     "last_game_player_lost": "💀Lost",
-    "game_guide_content": "👻Halloween Party Instructions:\n\n1️⃣ Survival Challenge: Stay on the ground, avoid falling into the void\n2️⃣ Watch out for bats: 🦇Bats attack players and reduce health\n3️⃣ Avoid ghosts: 👻Ghosts will chase players and explode, explosion may damage or heal you\n4️⃣ Collect candy: 🍬Pick up candy for three effects: heal❤️, clear bats🦇, or repair terrain🧱\n5️⃣ Skills: Left-click to use skill, right-click to check game info\n6️⃣ Victory conditions: Survive 4 minutes in single player🏆, defeat all opponents in multiplayer👑\n\nHave fun!🎃",
+    "game_guide_content": "👻Halloween Party Instructions:\n\n1️⃣ Survival Challenge: Stay on the ground, avoid falling into the void\n2️⃣ Watch out for bats: 🦇Bats attack players and reduce health\n3️⃣ Avoid ghosts: 👻Ghosts will chase players and explode, explosion may damage or heal you\n4️⃣ Collect candy: 🍬Pick up candy for three effects: heal❤️, clear bats🦇, or repair terrain🧱\n5️⃣ Skills: Left-click to use skill, right-click to check game info\n6️⃣ Beware of collisions: 💥Colliding with other entities causes damage, be careful to avoid\n7️⃣ Watch out for AI: 🤖AI will automatically spawn and throw pumpkins at players\n8️⃣ Victory conditions: Survive 4 minutes in single player🏆, defeat all opponents in multiplayer👑\n\nHave fun!🎃",
     "close": "✖️Close🗙"
   },
   "menu": {
@@ -256,7 +256,8 @@
       "hit_message": "💥You were hit by {{player}}'s [Dash] skill!🏃‍♂️",
       "hit_damage": "💔{{player}}'s Dash dealt {{damage}} damage to you!🏃‍♂️💥",
       "invulnerable_start": "🛡️Dash invulnerability activated!💫",
-      "invulnerable_end": "✨Dash invulnerability ended🛡️"
+      "invulnerable_end": "✨Dash invulnerability ended🛡️",
+      "refresh_cooldown": "✨Dash missed target, skill cooldown refreshed!⚡"
     },
     "chorus_fruit": {
       "name": "🍇Chorus Fruit✨",

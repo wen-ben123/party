@@ -1433,11 +1433,11 @@ var skillList = [
     name: i18n.t('skill.dash.name'),
     introduce: i18n.t('skill.dash.introduce'),
     notice: i18n.t('skill.dash.notice'),
-    cold: 10000, // 冲刺冷却时间改为10秒 ⚡⏰
+    cold: 17000, // 冲刺冷却时间改为17秒 ⚡⏰
     async effect(entity, raycast) {
       if (raycast) {
-        // 🛡️ 添加短暂无敌效果
-        entity.invulnerable = true;
+        // 🛡️ 使用综合效果函数添加短暂无敌效果 - 统一处理机制 ✨
+        await applySkillEffect(entity, 'shield', { duration: 1000 });
         entity.player.directMessage(i18n.t('skill.dash.invulnerable_start'));
 
         // ✨ 添加冲刺粒子特效
@@ -1453,37 +1453,53 @@ var skillList = [
         var dist = direction.mag();
         var speed = 2.5; // 提升冲刺速度
 
-        if (raycast.hitEntity && raycast.hitEntity.isPlayer) {
-          // 💥 对击中的玩家造成伤害
-          if (raycast.hitEntity.hp !== undefined) {
-            raycast.hitEntity.hp -= 2;
+        // 检查是否命中实体
+        const hitEntity = raycast.hitEntity;
+
+        if (hitEntity) {
+          // 💥 对击中的实体造成伤害（包括玩家和AI幽灵等）
+          if (hitEntity.hp !== undefined) {
+            hitEntity.hp -= 2;
             // 记录伤害数据 📊
             recordDamageDealt(entity, 2);
-            raycast.hitEntity.player.directMessage(
-              i18n.t('skill.dash.hit_damage', {
-                player: entity.player.name,
-                damage: 2,
-              })
-            );
+
+            // 只有玩家才有player属性，可以发送消息
+            if (hitEntity.isPlayer && hitEntity.player) {
+              hitEntity.player.directMessage(
+                i18n.t('skill.dash.hit_damage', {
+                  player: entity.player.name,
+                  damage: 2,
+                })
+              );
+            }
           }
 
-          raycast.hitEntity.velocity.x = (direction.x * speed) / dist;
-          raycast.hitEntity.velocity.z = (direction.z * speed) / dist;
-          raycast.hitEntity.velocity.y += 1.2; // 增强击退效果
-          raycast.hitEntity.player.directMessage(
-            i18n.t('skill.dash.hit_message', { player: entity.player.name })
-          );
+          hitEntity.velocity.x = (direction.x * speed) / dist;
+          hitEntity.velocity.z = (direction.z * speed) / dist;
+          hitEntity.velocity.y += 1.2; // 增强击退效果
+
+          // 只有玩家才有player属性，可以发送消息
+          if (hitEntity.isPlayer && hitEntity.player) {
+            hitEntity.player.directMessage(
+              i18n.t('skill.dash.hit_message', { player: entity.player.name })
+            );
+          }
         }
 
         entity.velocity.x = (direction.x * speed) / dist;
         entity.velocity.z = (direction.z * speed) / dist;
         entity.velocity.y = 0;
 
-        // ⏰ 1秒后移除无敌效果和粒子
+        // ⏰ 1秒后移除粒子效果（无敌效果由shieldEffect自动处理）
         setTimeout(() => {
-          entity.invulnerable = false;
           entity.particleRate = 0;
           entity.player.directMessage(i18n.t('skill.dash.invulnerable_end'));
+
+          // 如果没有命中实体，立即刷新CD ✨
+          if (!hitEntity) {
+            entity.skillCold = 0;
+            entity.player.directMessage(i18n.t('skill.dash.refresh_cooldown'));
+          }
         }, 1000);
       }
     },
@@ -1492,7 +1508,7 @@ var skillList = [
     name: i18n.t('skill.chorus_fruit.name'),
     introduce: i18n.t('skill.chorus_fruit.introduce'),
     notice: i18n.t('skill.chorus_fruit.notice'),
-    cold: 35000,
+    cold: 20000,
     async effect(entity, raycast) {
       // 使用封装的传送效果函数
       await applySkillEffect(entity, 'teleport');
@@ -1881,8 +1897,8 @@ var skillList = [
     notice: i18n.t('skill.shield_block.notice'),
     cold: 5000,
     async effect(entity, raycast) {
-      // 使用综合效果函数创建护盾效果
-      await applySkillEffect(entity, 'shield', { duration: 1500 });
+      // 使用综合效果函数创建护盾效果 - 无敌时间改为3秒 ✨
+      await applySkillEffect(entity, 'shield', { duration: 3000 });
     },
   },
   {
@@ -4409,7 +4425,7 @@ function startAISpawner() {
       ai.maxHp = 25; // AI最大生命值
 
       // AI伤害接收处理 - 仿照蝙蝠实现 🤖💥
-      ai.onTakeDamage(async ({ damage, damageType, source }) => {
+      ai.onTakeDamage(async ({ damage = 3, damageType, source }) => {
         try {
           if (!ai || ai.destroyed) return;
 
@@ -4601,7 +4617,7 @@ function startAISpawner() {
             if (tnt.boom) return;
             tnt.boom = true;
             tnt.addTag(i18n.t('tag.about_to_explode'));
-            await sleep(2000);
+            await sleep(1000); // AI的TNT爆炸时间改为1秒 🎯
 
             // 简化放大动画
             for (let i = 0; i < 15; i++) {
@@ -4946,7 +4962,7 @@ setInterval(() => {
           if (finalDamage > 0) {
             // 给玩家造成伤害
             if (player.hurt && !player.isInvincible) {
-              player.hurt(damage, {
+              player.hurt(finalDamage, {
                 damageType: i18n.t('damage.entity_collision'),
                 source: entity,
               });
@@ -4954,7 +4970,7 @@ setInterval(() => {
 
             // 给实体造成伤害 (如果实体支持伤害)
             if (entity.hurt && entity.enableDamage) {
-              entity.hurt(damage, {
+              entity.hurt(finalDamage, {
                 damageType: i18n.t('damage.entity_collision'),
                 source: player,
               });
